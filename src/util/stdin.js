@@ -6,27 +6,29 @@
  */
 const Bluebird     = require('bluebird');
 
-
 function stdin() {
-  return new Bluebird(
-    (resolve, reject) => {
-      const stream = process.stdin;
-      const chunks = [ ];
+	return new Bluebird(
+		(resolve, reject) => {
+			const stream = process.stdin;
+			const chunks = [];
 
-      if (stream.isTTY) { resolve({ }); }
+			if (stream.isTTY) {
+				resolve({ });
+			}
 
-      stream.setEncoding('utf8');
+			stream.setEncoding('utf8');
+			stream.on('data', d => chunks.push(d));
+			stream.on('end', () => {
+				if (chunks.length === 0) {
+					resolve({ });
+				}
+				const input = chunks.join('');
+				resolve(JSON.parse(input));
+			});
 
-      stream.on('data', d => chunks.push(d));
-
-      stream.on('end', () => {
-        if (chunks.length === 0) { resolve({ }); }
-        const input = chunks.join('');
-        resolve(JSON.parse(input));
-      });
-
-      stream.on('error', e => reject(e));
-    }
-  );
+			stream.on('error', e => reject(e));
+		}
+	);
 }
+
 module.exports = stdin;

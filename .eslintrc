@@ -1,7 +1,17 @@
 {
-  "extends": "ricepo-base",
-  "parser": "babel-eslint",
+  "extends": [
+	  "standard",
+	  "plugin:rc-leaflet/es-dev"
+  ],
+  "plugins": [
+	"rc-leaflet"
+  ],
   "env": {
+    "browser": true,
     "node": true
+  },
+  "rules": {
+	"indent": ["error", "tab", {"SwitchCase": 1}],
+	"max-len": ["error", 200]
   }
 }

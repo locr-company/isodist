@@ -15,33 +15,29 @@ const notify       = require('gulp-notify');
 const changed      = require('gulp-changed');
 const sourcemaps   = require('gulp-sourcemaps');
 
-
 /*!
  * Load plugin configuration files.
  */
 const out          = 'lib';
 
-
 /*!
  * Default build target.
  */
-gulp.task('default', [ 'rebuild' ]);
-
+gulp.task('default', ['rebuild']);
 
 /*!
  * Delete previous builds.
  */
 gulp.task('clean', () =>
-  del([ out + '/**' ])
+  del([`${out}/**`])
 );
-
 
 /*!
  * Incremental build (use with watch).
  */
 const build = function() {
 
-  const stream = gulp.src([ 'src/**/*.js' ], { base: 'src' })
+  const stream = gulp.src(['src/**/*.js'], { base: 'src' })
     .pipe(changed(out))
     .pipe(sourcemaps.init())
     .pipe(babel())
@@ -51,16 +47,14 @@ const build = function() {
   if (isci) { return stream; }
   return stream.pipe(notify({ message: 'Build Successful', onLast: true }));
 };
-gulp.task('build', [ 'lint' ], build);
-gulp.task('rebuild', [ 'relint' ], build);
-
+gulp.task('build', ['lint'], build);
+gulp.task('rebuild', ['relint'], build);
 
 /*!
  * Lint all source files.
  */
 const lint = function() {
-
-  return gulp.src([ 'src/**/*.js' ])
+  return gulp.src(['src/**/*.js'])
     .pipe(changed(out))
     .pipe(eslint())
     .pipe(eslint.format())
@@ -68,12 +62,11 @@ const lint = function() {
 
 };
 gulp.task('lint', lint);
-gulp.task('relint', [ 'clean' ], lint);
-
+gulp.task('relint', ['clean'], lint);
 
 /*!
  * Automatically rebuild on save.
  */
-gulp.task('watch', [ 'rebuild' ], () => {
-  gulp.watch('src/**/*.*', [ 'build' ]);
+gulp.task('watch', ['rebuild'], () => {
+  gulp.watch('src/**/*.*', ['build']);
 });

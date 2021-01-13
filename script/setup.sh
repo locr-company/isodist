@@ -4,8 +4,7 @@
 #
 
 destination=".osrm"
-release="5.3"
-
+release="5.23.0"
 
 #
 # Skip if already installed
@@ -15,12 +14,10 @@ if [ -d "$destination" ]; then
   exit 0
 fi
 
-
 #
 # Install build dependencies
 #
-brew install boost git cmake libzip libstxxl libxml2 lua51 luajit luabind tbb
-
+brew install --quiet boost git cmake libzip libstxxl libxml2 lua51 luajit luabind tbb
 
 #
 # Clone the OSRM repo
@@ -32,19 +29,17 @@ git checkout "$release"
 mkdir -p bin
 cd bin
 
-
 #
 # Generate CMake config and build the binaries
 #
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 
-
 #
 # Print out further instructions
 #
 echo "-------------------------------------------------------------------------------"
 echo "Please complete following steps to setup isodistance:"
-echo " - Visit http://download.geofabrik.de to download OSM files"
+echo " - Visit https://download.geofabrik.de to download OSM files"
 echo " - Place .osm files into osrm directory in package directory"
 echo " - $ npm run prepare"

@@ -1,0 +1,39 @@
+body {
+	position: absolute;
+	margin: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+
+input {
+	box-sizing: border-box;
+}
+
+#map {
+	width: 100%;
+	height: 100%;
+}
+
+#isodist-control {
+	background-color: white;
+	position: relative;
+	width: 30px;
+	height: 30px;
+}
+#isodist-control:hover {
+	width: initial;
+	height: initial;
+	min-width: 30px;
+	min-height: 30px;
+}
+#isodist-control-content {
+	display: none;
+}
+#isodist-control:hover #isodist-control-symbol {
+	display: none;
+}
+#isodist-control:hover #isodist-control-content {
+	display: block;
+}

@@ -7,98 +7,93 @@
  * @license MIT
  */
 /* eslint no-loop-func: 1 */
-const _            = require('lodash');
-const Turf         = require('turf');
-const bbox         = require('./bbox');
-const cdist        = require('./cdist');
-const log          = require('./util/log');
-const trace        = require('./trace');
-
+const _		= require('lodash');
+//const Turf	= require('@turf/turf');
+const Turf	= require('turf');
+const Path	= require('path');
+const bbox	= require('./bbox');
+const cdist	= require('./cdist');
+const log	= require('./util/log');
+const trace	= require('./trace');
 
 /**
  * Kink coefficient
  * Resolution is multiplied when kinks are detected
  */
-const KINK_COEFF = 2.0;
-
+// const KINK_COEFF = 2.0;
 
 /**
  * Maximum number of retries before failing
  */
 const MAX_RETRIES = 10;
 
-
-
 async function isodist(origin, stops, options) {
+	/**
+	 * Determine the bounding box and generate point grid
+	 */
+	const box = bbox(origin, _.max(stops));
 
-  /**
-   * Determine the bounding box and generate point grid
-   */
-  const box = bbox(origin, _.max(stops));
+	/**
+	 * Retry on kink
+	 */
+	let isolines = null;
+	let retries = 0;
+	options.map = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
 
+	while (!isolines) {
+		if (retries > MAX_RETRIES) {
+			log.fail('Could not eliminate kinks in isoline polygons');
+		}
 
-  /**
-   * Retry on kink
-   */
-  let isolines = null;
-  let retries = 0;
+		/**
+		 * Compute distances
+		 */
+		const pgrid = await cdist(options.map, origin, Turf.pointGrid(box, options.resolution, 'miles'));
 
-  while (!isolines) {
-    if (retries > MAX_RETRIES) {
-      log.fail('Could not eliminate kinks in isoline polygons');
-    }
+		/**
+		 * Generate isolines and convert them to polygons
+		 */
+		try {
+			isolines = stops.map(i => trace(pgrid, i, options));
+		} catch (x) {
+			if (!x.known) {
+				throw x;
+			}
+			options.resolution *= 2;
+			log.warn(`increased resolution to ${options.resolution} due to polygon kinks`);
+		}
 
-    /**
-     * Compute distances
-     */
-    const pgrid = await cdist(options.map,
-       origin, Turf.pointGrid(box, options.resolution, 'miles'));
+		retries++;
+	}
 
+	/**
+	 * Post-processing
+	 *  - Sort by reverse distance
+	 *  - Attach additional data to the feature properties
+	 */
+	log('Post-processing...');
+	const post = _
+		.chain(isolines)
+		//.sortBy(i => -i.properties.distance)
+		.forEach(i => {
+			const data = options.data[i.properties.distance];
+			if (!data) {
+				log.warn(`No data found for d=${i.properties.distance}`);
+			}
+			_.assign(i.properties, data);
+		})
+		.value();
 
-    /**
-     * Generate isolines and convert them to polygons
-     */
-    try {
-      isolines = stops.map(i => trace(pgrid, i, options));
-    } catch (x) {
-      if (!x.known) { throw x; }
-      options.resolution *= 2;
-      log.warn(`increased resolution to ${options.resolution} due to polygon kinks`);
-    }
+	/**
+	 * Sanity-check the result
+	 */
+	if (post.length !== stops.length) {
+		log.fail(`Expected ${stops.length} polygons but produced ${post.length}`);
+	}
 
-    retries++;
-  }
+	log.success('Complete');
 
-
-  /**
-   * Post-processing
-   *  - Sort by reverse distance
-   *  - Attach additional data to the feature properties
-   */
-  log('Post-processing...');
-  const post = _
-    .chain(isolines)
-    .sortBy(i => -i.properties.distance)
-    .forEach(i => {
-      const data = options.data[i.properties.distance];
-      if (!data) {
-        log.warn(`No data found for d=${i.properties.distance}`);
-      }
-      _.assign(i.properties, data);
-    })
-    .value();
-
-
-  /**
-   * Sanity-check the result
-   */
-  if (post.length !== stops.length) {
-    log.fail(`Expected ${stops.length} polygons but produced ${post.length}`);
-  }
-
-  log.success('Complete');
-
-
-  return Turf.featureCollection(post);
+	return Turf.featureCollection(post);
 }
+
 module.exports = isodist;
