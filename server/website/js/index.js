@@ -134,7 +134,8 @@ class IsoDistDemo {
 			steps: steps,
 			resolution: this.Resolution,
 			hexSize: this.HexSize,
-			noDeburr: this.NoDeburr
+			noDeburr: this.NoDeburr,
+			deintersect: true
 		};
 	
 		const options = {
@@ -191,6 +192,7 @@ class IsoDistDemo {
 							break;
 						}
 
+						const featuresCount = json.features.length;
 						for(const feature of json.features) {
 							if (feature.type !== 'Feature') {
 								alert(`invalid geojson-feature-type: ${feature.type}`);
@@ -213,7 +215,7 @@ class IsoDistDemo {
 								break;
 							}
 
-							let color = colors[polygonCounter] || 'blue';
+							let color = colors[featuresCount - 1 - polygonCounter] || 'white';
 
 							switch(geometry.type) {
 								case 'Polygon':

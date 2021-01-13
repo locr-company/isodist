@@ -47,7 +47,8 @@ function run(options) {
 
 	_.defaults(options, {
 		resolution: 0.1,
-		hexSize: 0.5
+		hexSize: 0.5,
+		deintersect: false
 	});
 
 	return IsoDist(options.origin, options.steps, options);

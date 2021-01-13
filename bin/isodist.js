@@ -33,6 +33,8 @@ const argv = Yargs
 	.describe('h', 'Size of hex grid cells')
 	.boolean('no-deburr')
 	.describe('no-deburr', 'Disable removal of isolated "islands" from isodistance result')
+	.boolean('deintersect')
+	.describe('deintersect', 'Deintersects all polygons')
 	.argv;
 
 /**
@@ -76,7 +78,8 @@ StdIn()
 			resolution: argv.r,
 			noDeburr: argv.noDeburr,
 			hexSize: argv.h,
-			map: argv.m
+			map: argv.m,
+			deintersect: argv.deintersect
 		});
 
 		/**

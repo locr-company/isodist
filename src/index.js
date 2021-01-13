@@ -74,7 +74,7 @@ async function isodist(origin, stops, options) {
 	log('Post-processing...');
 	const post = _
 		.chain(isolines)
-		//.sortBy(i => -i.properties.distance)
+		.sortBy(i => -i.properties.distance)
 		.forEach(i => {
 			const data = options.data[i.properties.distance];
 			if (!data) {
@@ -92,6 +92,12 @@ async function isodist(origin, stops, options) {
 	}
 
 	log.success('Complete');
+
+	if (options.deintersect && post.length > 1) {
+		for(i = 0; i < post.length - 1; i++) {
+			post[i] = Turf.difference(post[i], post[i + 1]);
+		}
+	}
 
 	return Turf.featureCollection(post);
 }
