@@ -8,8 +8,7 @@
  */
 /* eslint no-loop-func: 1 */
 const _		= require('lodash');
-//const Turf	= require('@turf/turf');
-const Turf	= require('turf');
+const Turf	= require('@turf/turf');
 const Path	= require('path');
 const bbox	= require('./bbox');
 const cdist	= require('./cdist');
@@ -31,7 +30,8 @@ async function isodist(origin, stops, options) {
 	/**
 	 * Determine the bounding box and generate point grid
 	 */
-	const box = bbox(origin, _.max(stops));
+	const maxStop = _.max(stops);
+	const box = bbox(origin, maxStop);
 
 	/**
 	 * Retry on kink
@@ -40,21 +40,21 @@ async function isodist(origin, stops, options) {
 	let retries = 0;
 	options.map = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
 
+	/**
+	 * Compute distances
+	 */
+	const pgrid = await cdist(options.map, origin, Turf.pointGrid(box, options.resolution, { units: 'kilometers' }));
+
 	while (!isolines) {
 		if (retries > MAX_RETRIES) {
 			log.fail('Could not eliminate kinks in isoline polygons');
 		}
 
 		/**
-		 * Compute distances
-		 */
-		const pgrid = await cdist(options.map, origin, Turf.pointGrid(box, options.resolution, 'miles'));
-
-		/**
 		 * Generate isolines and convert them to polygons
 		 */
 		try {
-			isolines = stops.map(i => trace(pgrid, i, options));
+			isolines = stops.map(i => trace(pgrid, i, options, origin));
 		} catch (x) {
 			if (!x.known) {
 				throw x;
@@ -94,7 +94,14 @@ async function isodist(origin, stops, options) {
 	log.success('Complete');
 
 	if (options.deintersect && post.length > 1) {
-		for(i = 0; i < post.length - 1; i++) {
+		for(let i = 0; i < post.length - 1; i++) {
+			for(let j = i; j < post.length - 1; j++) {
+				const properties = Object.assign({}, post[i].properties);
+				post[i] = Turf.union(post[i], post[j + 1]);
+				post[i].properties = properties;
+			}
+		}
+		for(let i = 0; i < post.length - 1; i++) {
 			post[i] = Turf.difference(post[i], post[i + 1]);
 		}
 	}

@@ -63,8 +63,7 @@
     "lodash": "~4.17.20",
     "osrm": "~5.23.0",
     "single-line-log": "~1.1.2",
-    "turf": "~3.0.14",
-    "turf-line-to-polygon": "~0.2.1",
+    "@turf/turf": "~6.2.0",
     "yargs": "~16.2.0"
   },
   "keywords": [],

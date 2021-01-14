@@ -7,10 +7,9 @@
 const _            = require('lodash');
 const log          = require('./util/log');
 const round        = require('./util/round');
-//const Turf         = require('@turf/turf');
-const Turf         = require('turf');
+const Turf         = require('@turf/turf');
 
-function trace(pgrid, d, opts) {
+function trace(pgrid, d, opts, origin) {
 	/**
 	 * Filter out points not within step range
 	 */
@@ -22,7 +21,9 @@ function trace(pgrid, d, opts) {
 	 */
 	log(`Tracing d=${d}...`);
 	const delta = opts.hexSize > 0 ? opts.hexSize : 0.5;
-	const hull = Turf.concave(filtered, delta, 'miles');
+	let hull = Turf.concave(filtered, { maxEdge: delta, unit: 'kilometers' });
+	const boundingCircle = Turf.circle(origin, d, { units: 'kilometers' });
+	hull = Turf.intersect(hull, boundingCircle);
 	hull.properties.distance = d;
 
 	/**
@@ -38,8 +39,7 @@ function trace(pgrid, d, opts) {
 	 */
 	const featureCollection = Turf.featureCollection([hull]);
 	const box = Turf.bbox(featureCollection);
-	//const grid = Turf.hexGrid(box, opts.hexSize, {units: 'kilometers'});
-	const grid = Turf.hexGrid(box, opts.hexSize, 'miles');
+	const grid = Turf.hexGrid(box, opts.hexSize, {units: 'kilometers', mask: hull});
 	const total = grid.features.length;
 
 	/**

@@ -11,16 +11,11 @@ const OSRM		= require('osrm');
 
 function routeOSRM(osrm, options) {
 	return new Promise((resolve, reject) => {
-		if (!options.headers) {
+		if (!options.coordinates) {
 			reject();
 			return;
 		}
-		const headers = options.headers;
-		if (!headers.coordinates) {
-			reject();
-			return;
-		}
-		const coordinates = headers.coordinates;
+		const coordinates = options.coordinates;
 
 		const routeOptions = {
 			coordinates: [
@@ -63,11 +58,6 @@ async function cdist(mapName, origin, pgrid, options) {
 	const chunks = _.chunk(pgrid.features, options.chunkSize);
 
 	/**
-	 * get map name
-	 */
-	const map = firstUpperCase(mapName);
-
-	/**
 	 * Create the mapping function
 	 */
 	async function _single(feature) {
@@ -76,22 +66,13 @@ async function cdist(mapName, origin, pgrid, options) {
 			[ feature.geometry.coordinates[1], feature.geometry.coordinates[0] ]
 		];
 
-		const polylineStr = polyline.encode(coordinates);
-
 		const option = {
-			// uri: `https://routing.openstreetmap.de/routed-car/route/v1/car/polyline(${polylineStr})`,
-			uri: `http://localhost:5000/route/v1/car/polyline(${polylineStr})`,
-			headers: {
-				map,
-				coordinates
-			},
+			coordinates,
 			json: true // Automatically parses the JSON string in the response
 		};
 		try {
-			// const result =  await rp(option);
 			const result = await routeOSRM(osrm, option);
-
-			feature.properties.distance = result.routes.length > 0 ? result.routes[0].distance * 0.000621371 : Number.MAX_VALUE;
+			feature.properties.distance = result.routes.length > 0 ? result.routes[0].distance * 0.001 : Number.MAX_VALUE;
 		} catch (error) {
 			// console.log(error);
 		}
@@ -108,14 +89,6 @@ async function cdist(mapName, origin, pgrid, options) {
 	log.success('Computing distances');
 
 	return pgrid;
-}
-
-function firstUpperCase(str) {
-	if (str === 'France') {
-		return 'IleDeFrance';
-	}
-
-	return str.toLowerCase().replace(/(\s|^)[a-z]/g, (L) => L.toUpperCase().trim());
 }
 
 module.exports = cdist;

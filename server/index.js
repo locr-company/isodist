@@ -16,12 +16,14 @@ const Cors         = require('cors');
 
 const app          = Express();
 
+const apiTimeout = 30 * 60 * 1000;
+
 app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
-// app.use(BodyParser.urlencoded({ extended: true }));
 
 app.post('/', (req, res) => {
+	req.setTimeout(apiTimeout);
 	run(req.body)
 		.then((data) => {
 			// res.json(_.get(data, 'features[0].geometry'));

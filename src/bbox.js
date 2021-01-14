@@ -4,15 +4,14 @@
  * @author  Denis Luchkin-Zhou <denis@ricepo.com>
  * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
  */
-//const Turf         = require('@turf/turf');
-const Turf         = require('turf');
+const Turf         = require('@turf/turf');
 const GeoPoint     = require('geopoint');
 const log          = require('./util/log');
 
 /**
- * @desc   Generates the bounding rectangle given an origin point and radius in miles
+ * @desc   Generates the bounding rectangle given an origin point and radius in kilometers
  * @param  {Point}     center   GeoJSON point representing the center of the bounding box
- * @param  {Number}    radius   Radius of the bounding box, in miles
+ * @param  {Number}    radius   Radius of the bounding box, in kilometers
  * @return {Number[]}           Turf.js bounding box
  */
 function bbox(center, radius) {
@@ -22,7 +21,7 @@ function bbox(center, radius) {
 	 * Generate corner points of the bounding box
 	 */
 	const points = new GeoPoint(...center.coordinates.slice().reverse())
-		.boundingCoordinates(radius)
+		.boundingCoordinates(radius, undefined, true)
 		.map(i => Turf.point([ i._degLon, i._degLat ]));
 
 	/**

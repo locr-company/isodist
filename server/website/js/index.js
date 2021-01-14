@@ -17,8 +17,20 @@ class IsoDistDemo {
 			this.refreshIsoDist(evt.target.getLatLng());
 		});
 		this._polygons = [];
+		this._circles = [];
 
 		this.refreshIsoDist(this._marker.getLatLng());
+	}
+
+	get DisplayRadius() {
+		let displayRadius = false;
+
+		const displayRadiusInput = document.getElementById('isodist-display-radius');
+		if (displayRadiusInput instanceof HTMLInputElement) {
+			displayRadius = displayRadiusInput.checked;
+		}
+
+		return displayRadius;
 	}
 
 	get Distance1() {
@@ -156,13 +168,17 @@ class IsoDistDemo {
 				while(oldPolygon = this._polygons.pop()) {
 					oldPolygon.remove();
 				}
+				let oldCircle = undefined;
+				while(oldCircle = this._circles.pop()) {
+					oldCircle.remove();
+				}
 	
 				if (!json.type) {
 					alert('no type found in geojson');
 					return;
 				}
 
-				const addPolygon = (coordinates, color) => {
+				const reverseLatLongCoordinates = function(coordinates) {
 					const leafletCoordinates = [];
 					for(const subCoordinates of coordinates) {
 						const leafletCoordinatesSub = [];
@@ -172,10 +188,7 @@ class IsoDistDemo {
 						leafletCoordinates.push(leafletCoordinatesSub)
 					}
 
-					const polygon = L.polygon(leafletCoordinates, { color: color });
-					polygon.addTo(this._map);
-
-					this._polygons.push(polygon);
+					return leafletCoordinates;
 				};
 
 				const colors = ['lime', 'yellow', 'red'];
@@ -219,27 +232,35 @@ class IsoDistDemo {
 
 							switch(geometry.type) {
 								case 'Polygon':
-									const leafletCoordinates = [];
-									for(const coordinates of geometry.coordinates) {
-										const leafletCoordinatesSub = [];
-										for(const point of coordinates) {
-											leafletCoordinatesSub.push([point[1], point[0]]);
-										}
-										leafletCoordinates.push(leafletCoordinatesSub)
-									}
-
+									const leafletCoordinates = reverseLatLongCoordinates(geometry.coordinates);
 									const polygon = L.polygon(leafletCoordinates, { color: color });
 									polygon.addTo(this._map);
-
 									this._polygons.push(polygon);
+
+									if (this.DisplayRadius && feature.properties && feature.properties.distance) {
+										const circle = L.circle(this.getMarkerCenter(), { color: color, fill: false, radius: feature.properties.distance * 1000 });
+										circle.addTo(this._map);
+										this._circles.push(circle);
+									}
 
 									polygonCounter++;
 									break;
 								
 								case 'MultiPolygon':
-									for(const coordinates of geometry.coordinates) {
-										addPolygon(coordinates, color);
+									let multiCoordinates = geometry.coordinates;
+									for(let i in multiCoordinates) {
+										multiCoordinates[i] = reverseLatLongCoordinates(multiCoordinates[i]);
 									}
+									const multiPolygon = L.polygon(multiCoordinates, { color: color });
+									multiPolygon.addTo(this._map);
+									this._polygons.push(multiPolygon);
+
+									if (this.DisplayRadius && feature.properties && feature.properties.distance) {
+										const circle = L.circle(this.getMarkerCenter(), { color: color, fill: false, radius: feature.properties.distance * 1000 });
+										circle.addTo(this._map);
+										this._circles.push(circle);
+									}
+
 									polygonCounter++;
 									break;
 								
@@ -262,6 +283,10 @@ class IsoDistDemo {
 				let oldPolygon = undefined;
 				while(oldPolygon = this._polygons.pop()) {
 					oldPolygon.remove();
+				}
+				let oldCircle = undefined;
+				while(oldCircle = this._circles.pop()) {
+					oldCircle.remove();
 				}
 				alert(exc);
 			});
@@ -326,13 +351,13 @@ L.Control.IsoDist = L.Control.extend({
 		table.appendChild(tBody);
 		table.appendChild(tFoot);
 
-		const tRowDistance1 = buildNumberInputRow('distance 1 (mi):', 'isodist-distance-1', { value: 2, min: 0.1, step: 0.1 });
+		const tRowDistance1 = buildNumberInputRow('distance 1 (km):', 'isodist-distance-1', { value: 2, min: 0.1, step: 0.1 });
 		tBody.appendChild(tRowDistance1);
 
-		const tRowDistance2 = buildNumberInputRow('distance 2 (mi):', 'isodist-distance-2', { value: 0, min: 0, step: 0.1 });
+		const tRowDistance2 = buildNumberInputRow('distance 2 (km):', 'isodist-distance-2', { value: 0, min: 0, step: 0.1 });
 		tBody.appendChild(tRowDistance2);
 
-		const tRowDistance3 = buildNumberInputRow('distance 3 (mi):', 'isodist-distance-3', { value: 0, min: 0, step: 0.1 });
+		const tRowDistance3 = buildNumberInputRow('distance 3 (km):', 'isodist-distance-3', { value: 0, min: 0, step: 0.1 });
 		tBody.appendChild(tRowDistance3);
 
 		const tRowResolution = document.createElement('tr');
@@ -381,6 +406,19 @@ L.Control.IsoDist = L.Control.extend({
 		tColNoDeburr2.appendChild(noDeburrInput);
 		tRowNoDeburr.appendChild(tColNoDeburr2);
 		tBody.appendChild(tRowNoDeburr);
+
+		const tRowDisplayRadius = document.createElement('tr');
+		const tColDisplayRadius1 = document.createElement('td');
+		tColDisplayRadius1.appendChild(document.createTextNode('display radius:'));
+		tRowDisplayRadius.appendChild(tColDisplayRadius1);
+		const tColDisplayRadius2 = document.createElement('td');
+		tColDisplayRadius2.style.textAlign = 'center';
+		const displayRadiusInput = document.createElement('input');
+		displayRadiusInput.id = 'isodist-display-radius';
+		displayRadiusInput.type = 'checkbox';
+		tColDisplayRadius2.appendChild(displayRadiusInput);
+		tRowDisplayRadius.appendChild(tColDisplayRadius2);
+		tBody.appendChild(tRowDisplayRadius);
 
 		const tFootRow = document.createElement('tr');
 		const tFootCol = document.createElement('td');

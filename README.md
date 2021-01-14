@@ -1,12 +1,16 @@
 # ![Header][0]
 
-> mad-science@ricepo
-
 This package can compute isodistance polygons based on driving distance.
+
+## Prerequisites for Ubuntu 20.04
+```sh
+sudo apt install build-essential curl file git libtbb2 libtbb-dev lua5.3 liblua5.3-0 liblua5.3-dev libluabind-dev
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+```
 
 ## Getting Started
 ```sh
-$ git clone git@github.com:ricepo/isodist.git
+$ git clone git@github.com:locr-company/isodist.git
 $ cd isodist
 $ npm install
 ```
@@ -72,7 +76,7 @@ Longitude of the origin point.
 **Required**.
 
 Distance at which to compute isodistance polygons.
-For example, to compute isodistance polygons at 1, 2, 5 and 10 miles, use
+For example, to compute isodistance polygons at 1, 2, 5 and 10 kilometers, use
 `--step 1 --step 2 --step 5 --step 10`
 
 
