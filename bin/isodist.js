@@ -10,12 +10,13 @@
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-const _            = require('lodash');
-const Path         = require('path');
-const Yargs        = require('yargs');
-const IsoDist      = require('..');
-const log          = require('../src/util/log');
-const StdIn        = require('../src/util/stdin');
+const _			= require('lodash');
+const log		= require('../src/util/log');
+const OSRM		= require('osrm');
+const Path		= require('path');
+const IsoDist	= require('..');
+const StdIn		= require('../src/util/stdin');
+const Yargs		= require('yargs');
 
 /**
  * Process CLI arguments
@@ -70,22 +71,23 @@ StdIn()
 		if (!options.steps || !options.steps.length) {
 			log.fail('Could not determine isodistance steps');
 		}
+		const data = {};
+		for(let i = 0; i < options.steps.length; i++) {
+			data[options.steps[i]] = { distance: options.steps[i] };
+		}
+
+		options.data = data;
 
 		/**
 		 * Copy over -h, -r and -m
 		 */
-		_.defaults(options, {
+		options = _.defaults(options, {
 			resolution: argv.r,
 			noDeburr: argv.noDeburr,
 			hexSize: argv.h,
 			map: argv.m,
 			deintersect: argv.deintersect
 		});
-
-		/**
-		 * Resolve the options path
-		 */
-		options.map = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
 
 		/**
 		 * We really need that map though
@@ -95,9 +97,15 @@ StdIn()
 		}
 
 		/**
+		 * Resolve the options path
+		 */
+		const mapName = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
+		const osrm = new OSRM(mapName);
+
+		/**
 		 * Start processing
 		 */
-		return IsoDist(options.origin, options.steps, options);
+		return IsoDist(options.origin, options.steps, options, osrm);
 	})
 	.then(fc => {
 		const output = JSON.stringify(fc, null, 2);

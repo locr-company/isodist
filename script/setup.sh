@@ -3,8 +3,6 @@
 # Sets up OSRM backend on MacOS
 #
 
-set -e
-
 destination=".osrm"
 release="v5.23.0"
 

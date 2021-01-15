@@ -5,9 +5,7 @@
  * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
  */
 const _			= require('lodash');
-const polyline	= require('@mapbox/polyline');
 const log		= require('./util/log');
-const OSRM		= require('osrm');
 
 function routeOSRM(osrm, options) {
 	return new Promise((resolve, reject) => {
@@ -36,21 +34,19 @@ function routeOSRM(osrm, options) {
 /**
  * Generates distance from origin to each point
  *
+ * @param  {Object} osrm OSRM-class
  * @param  {Object} origin GeoJSON point representing the origin
  * @param  {Object} pgrid GeoJSON FeatureCollection of points
- * @param  {Object} options Additional options
  * @return {Object}       pgrid with distance metrics assigned
  */
-async function cdist(mapName, origin, pgrid, options) {
+async function cdist(osrm, origin, pgrid) {
 	/**
 	 * Default option values
 	 */
-	options = _.defaults(options, {
+	const options = {
 		chunkSize: 1000,
 		delay: 0
-	});
-
-	const osrm = new OSRM(mapName);
+	};
 
 	/**
 	 * Separate into chunks

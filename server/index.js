@@ -8,16 +8,17 @@
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-const _            = require('lodash');
-const IsoDist      = require('..');
-const Express      = require('express');
-const BodyParser   = require('body-parser');
-const Cors         = require('cors');
-
-const app          = Express();
+const _				= require('lodash');
+const BodyParser	= require('body-parser');
+const Cors			= require('cors');
+const Express		= require('express');
+const IsoDist		= require('..');
+const OSRM			= require('osrm');
+const Path			= require('path');
 
 const apiTimeout = 30 * 60 * 1000;
 
+const app = Express();
 app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
@@ -26,7 +27,6 @@ app.post('/', (req, res) => {
 	req.setTimeout(apiTimeout);
 	run(req.body)
 		.then((data) => {
-			// res.json(_.get(data, 'features[0].geometry'));
 			res.json(data);
 		})
 		.catch((err) => {
@@ -47,11 +47,14 @@ function run(options) {
 	options.data = _.keyBy(options.steps, 'distance');
 	options.steps = _.map(options.steps, 'distance');
 
-	_.defaults(options, {
+	options = _.defaults(options, {
 		resolution: 0.1,
 		hexSize: 0.5,
 		deintersect: false
 	});
 
-	return IsoDist(options.origin, options.steps, options);
+	const mapName = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
+	const osrm = new OSRM(mapName);
+
+	return IsoDist(options.origin, options.steps, options, osrm);
 }

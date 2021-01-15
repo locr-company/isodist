@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 #
 # Prepares the .osm data files in osrm directory
 #

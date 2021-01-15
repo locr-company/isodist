@@ -9,7 +9,6 @@
 /* eslint no-loop-func: 1 */
 const _		= require('lodash');
 const Turf	= require('@turf/turf');
-const Path	= require('path');
 const bbox	= require('./bbox');
 const cdist	= require('./cdist');
 const log	= require('./util/log');
@@ -26,7 +25,7 @@ const trace	= require('./trace');
  */
 const MAX_RETRIES = 10;
 
-async function isodist(origin, stops, options) {
+async function isodist(origin, stops, options, osrm) {
 	/**
 	 * Determine the bounding box and generate point grid
 	 */
@@ -38,12 +37,11 @@ async function isodist(origin, stops, options) {
 	 */
 	let isolines = null;
 	let retries = 0;
-	options.map = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
 
 	/**
 	 * Compute distances
 	 */
-	const pgrid = await cdist(options.map, origin, Turf.pointGrid(box, options.resolution, { units: 'kilometers' }));
+	const pgrid = await cdist(osrm, origin, Turf.pointGrid(box, options.resolution, { units: 'kilometers' }));
 
 	while (!isolines) {
 		if (retries > MAX_RETRIES) {
