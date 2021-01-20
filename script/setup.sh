@@ -10,18 +10,18 @@ release="v5.23.0"
 # Skip if already installed
 #
 if [ -d "$destination" ]; then
-  echo "OSRM already installed, skipping"
-  exit 0
+    echo "OSRM already installed, skipping"
+    exit 0
 fi
 
 #
 # Install build dependencies
 #
-brew install --quiet boost git cmake libzip libstxxl libxml2 lua51 luajit luabind tbb
+sudo apt install -y git cmake libxml2 lua5.3 liblua5.3-0 liblua5.3-dev luajit libboost-all-dev
 
 #
 # Clone the OSRM repo
-# IMPORTANT: We MUST checkout 5.3 tag or otherwise routing will fail down the road
+# IMPORTANT: We MUST checkout 5.23 tag or otherwise routing will fail down the road
 #
 git clone https://github.com/Project-OSRM/osrm-backend.git "$destination"
 cd "$destination"

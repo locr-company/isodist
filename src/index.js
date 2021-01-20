@@ -18,7 +18,7 @@ const trace	= require('./trace');
  * Kink coefficient
  * Resolution is multiplied when kinks are detected
  */
-// const KINK_COEFF = 2.0;
+const KINK_COEFF = 2.0;
 
 /**
  * Maximum number of retries before failing
@@ -57,7 +57,7 @@ async function isodist(origin, stops, options, osrm) {
 			if (!x.known) {
 				throw x;
 			}
-			options.resolution *= 2;
+			options.resolution *= KINK_COEFF;
 			log.warn(`increased resolution to ${options.resolution} due to polygon kinks`);
 		}
 
