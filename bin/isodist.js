@@ -3,9 +3,8 @@
 /**
  * bin/isodist.js
  *
- * @author Denis Luchkin-Zhou <denis@ricepo.com>
- * @author Ringo Leese <r.leese@locr.com
- * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
+ * @author  Ringo Leese <r.leese@locr.com>
+ * @license MIT
  * @example node bin/isodist.js --lon=9.86557 --lat=52.3703 -s 2 -s 5 -s 7 -r 0.1 -h 0.5 -m niedersachsen-latest
  */
 /* eslint strict: 0, no-process-exit: 0 */
@@ -83,10 +82,10 @@ StdIn()
 		 */
 		options = _.defaults(options, {
 			resolution: argv.r,
-			noDeburr: argv.noDeburr,
+			noDeburr: argv.noDeburr || false,
 			hexSize: argv.h,
 			map: argv.m,
-			deintersect: argv.deintersect
+			deintersect: argv.deintersect || false
 		});
 
 		/**

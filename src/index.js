@@ -3,7 +3,7 @@
 /**
  * index.js
  *
- * @author  Denis Luchkin-Zhou <denis@ricepo.com>
+ * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
  */
 /* eslint no-loop-func: 1 */
@@ -25,12 +25,18 @@ const KINK_COEFF = 2.0;
  */
 const MAX_RETRIES = 10;
 
-async function isodist(origin, stops, options, osrm) {
+/**
+ * @param {GeoJSON} origin Example: { type: "Point", coordinates: [ 9.86557, 52.3703 ] }
+ * @param {number[]} steps 
+ * @param {Object} options 
+ * @param {OSRM} osrm 
+ */
+async function isodist(origin, steps, options, osrm) {
 	/**
 	 * Determine the bounding box and generate point grid
 	 */
-	const maxStop = _.max(stops);
-	const box = bbox(origin, maxStop);
+	const maxStep = _.max(steps);
+	const box = bbox(origin, maxStep);
 
 	/**
 	 * Retry on kink
@@ -52,7 +58,7 @@ async function isodist(origin, stops, options, osrm) {
 		 * Generate isolines and convert them to polygons
 		 */
 		try {
-			isolines = stops.map(i => trace(pgrid, i, options, origin));
+			isolines = steps.map(i => trace(pgrid, i, options, origin));
 		} catch (x) {
 			if (!x.known) {
 				throw x;
@@ -85,8 +91,8 @@ async function isodist(origin, stops, options, osrm) {
 	/**
 	 * Sanity-check the result
 	 */
-	if (post.length !== stops.length) {
-		log.fail(`Expected ${stops.length} polygons but produced ${post.length}`);
+	if (post.length !== steps.length) {
+		log.fail(`Expected ${steps.length} polygons but produced ${post.length}`);
 	}
 
 	log.success('Complete');

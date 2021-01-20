@@ -1,11 +1,11 @@
 # ![Header][0]
 
-This package can compute isodistance polygons based on driving distance.
+This package can compute isodistance polygons based on driving distance.  
+This repository is originally forked from https://github.com/ricepo/isodist
 
 ## Prerequisites for Ubuntu 20.04
 ```sh
 sudo apt install build-essential curl file git libtbb2 libtbb-dev lua5.3 liblua5.3-0 liblua5.3-dev libluabind-dev
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 ```
 
 ## Getting Started
@@ -112,4 +112,4 @@ This flag instructs `isodist` not to remove isolated "islands" from isodistance 
 
 
 [0]: media/isodist.png
-[1]: http://download.geofabrik.de
+[1]: https://download.geofabrik.de

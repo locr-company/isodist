@@ -1,12 +1,11 @@
 /**
  * bbox.js
  *
- * @author  Denis Luchkin-Zhou <denis@ricepo.com>
- * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
+ * @author  Ringo Leese <r.leese@locr.com>
+ * @license MIT
  */
-const Turf         = require('@turf/turf');
-const GeoPoint     = require('geopoint');
-const log          = require('./util/log');
+const Turf	= require('@turf/turf');
+const log	= require('./util/log');
 
 /**
  * @desc   Generates the bounding rectangle given an origin point and radius in kilometers
@@ -17,21 +16,13 @@ const log          = require('./util/log');
 function bbox(center, radius) {
 	log('Computing bounding box...');
 
-	/**
-	 * Generate corner points of the bounding box
-	 */
-	const points = new GeoPoint(...center.coordinates.slice().reverse())
-		.boundingCoordinates(radius, undefined, true)
-		.map(i => Turf.point([ i._degLon, i._degLat ]));
-
-	/**
-	 * Wrap into a FeatureCollection
-	 */
-	const fc = Turf.featureCollection(points);
-
-	/**
-	 * Generate the actual bounding box
-	 */
+	const turfCenter = Turf.point(center.coordinates);
+	const fc = Turf.featureCollection([
+		Turf.destination(turfCenter, radius, 0),
+		Turf.destination(turfCenter, radius, 90),
+		Turf.destination(turfCenter, radius, 180),
+		Turf.destination(turfCenter, radius, 270)
+	]);
 	log.success('Computing bounding box');
 	return Turf.bbox(fc);
 }

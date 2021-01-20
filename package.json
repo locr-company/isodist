@@ -57,7 +57,6 @@
     "chalk": "~4.1.0",
     "cors": "~2.8.5",
     "express": "~4.17.1",
-    "geopoint": "~1.0.1",
     "lodash": "~4.17.20",
     "osrm": "~5.23.0",
     "single-line-log": "~1.1.2",
