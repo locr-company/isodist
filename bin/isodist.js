@@ -13,7 +13,7 @@ const _			= require('lodash');
 const log		= require('../src/util/log');
 const OSRM		= require('osrm');
 const Path		= require('path');
-const IsoDist	= require('..');
+const { IsoDist, VALID_PROVIDERS }	= require('..');
 const StdIn		= require('../src/util/stdin');
 const Yargs		= require('yargs');
 
@@ -31,6 +31,12 @@ const argv = Yargs
 	.alias('h', 'hex-size')
 	.default('h', 0.5)
 	.describe('h', 'Size of hex grid cells')
+	.alias('p', 'profile')
+	.default('p', 'car')
+	.describe('p', 'Routing profile to use (car, motorbike, pedestrian...)')
+	.default('provider', 'osrm')
+	.describe('provider', 'Routing provider (osrm, valhalla)')
+	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
 	.boolean('no-deburr')
 	.describe('no-deburr', 'Disable removal of isolated "islands" from isodistance result')
 	.boolean('deintersect')
@@ -81,30 +87,50 @@ StdIn()
 		 * Copy over -h, -r and -m
 		 */
 		options = _.defaults(options, {
-			resolution: argv.r,
-			noDeburr: argv.noDeburr || false,
+			deintersect: argv.deintersect || false,
+			endpoint: argv.endpoint,
 			hexSize: argv.h,
 			map: argv.m,
-			deintersect: argv.deintersect || false
+			noDeburr: argv.noDeburr || false,
+			profile: argv.profile || 'car',
+			provider: argv.provider || 'osrm',
+			resolution: argv.r
 		});
 
-		/**
-		 * We really need that map though
-		 */
-		if (!options.map) {
-			log.fail('Missing OSRM map path');
+		if (VALID_PROVIDERS.indexOf(options.provider) === -1) {
+			log.fail(`Invalid provider (${options.provider})`);
 		}
 
-		/**
-		 * Resolve the options path
-		 */
-		const mapName = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
-		const osrm = new OSRM(mapName);
+		switch(options.provider) {
+			case 'osrm':
+				if (options.endpoint) {
+					if (options.map) {
+						log.fail('Ambigious parameters where given (--endpoint and --map). Please only use 1 of them!');
+					}
+				} else {
+					if (!options.map) {
+						log.fail('Missing OSRM map name, if no endpoint is given');
+					}
+
+					/**
+					 * Resolve the options path
+					 */
+					const mapName = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
+					options.osrm = new OSRM(mapName);
+				}
+				break;
+			
+			case 'valhalla':
+				if (!options.endpoint) {
+					log.fail('Missing endpoint for provider: valhalla');
+				}
+				break;
+		}
 
 		/**
 		 * Start processing
 		 */
-		return IsoDist(options.origin, options.steps, options, osrm);
+		return IsoDist(options.origin, options.steps, options);
 	})
 	.then(fc => {
 		const output = JSON.stringify(fc, null, 2);

@@ -25,13 +25,14 @@ const KINK_COEFF = 2.0;
  */
 const MAX_RETRIES = 10;
 
+const VALID_PROVIDERS = ['osrm', 'valhalla'];
+
 /**
  * @param {GeoJSON} origin Example: { type: "Point", coordinates: [ 9.86557, 52.3703 ] }
  * @param {number[]} steps 
  * @param {Object} options 
- * @param {OSRM} osrm 
  */
-async function isodist(origin, steps, options, osrm) {
+async function IsoDist(origin, steps, options) {
 	/**
 	 * Determine the bounding box and generate point grid
 	 */
@@ -47,7 +48,7 @@ async function isodist(origin, steps, options, osrm) {
 	/**
 	 * Compute distances
 	 */
-	const pgrid = await cdist(osrm, origin, Turf.pointGrid(box, options.resolution, { units: 'kilometers' }));
+	const pgrid = await cdist(origin, Turf.pointGrid(box, options.resolution), options);
 
 	while (!isolines) {
 		if (retries > MAX_RETRIES) {
@@ -113,4 +114,4 @@ async function isodist(origin, steps, options, osrm) {
 	return Turf.featureCollection(post);
 }
 
-module.exports = isodist;
+module.exports = { IsoDist, VALID_PROVIDERS };

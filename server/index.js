@@ -3,8 +3,8 @@
 /**
  * server/index.js
  *
- * @author  Hao Chen <a@ricepo.com>
- * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
+ * @author  Ringo Leese <r.leese@locr.com>
+ * @license MIT
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
@@ -12,9 +12,10 @@ const _				= require('lodash');
 const BodyParser	= require('body-parser');
 const Cors			= require('cors');
 const Express		= require('express');
-const IsoDist		= require('..');
+const { IsoDist, VALID_PROVIDERS }	= require('..');
 const OSRM			= require('osrm');
 const Path			= require('path');
+const log			= require('../src/util/log');
 
 const apiTimeout = 30 * 60 * 1000;
 
@@ -30,16 +31,16 @@ app.post('/', (req, res) => {
 			res.json(data);
 		})
 		.catch((err) => {
-			// eslint-disable-next-line no-console
-			console.log(err);
+			log.warn(err);
 			res.status(500).send('Something broke!');
 		});
 });
 
+const httpPort = process.env.PORT || 3456;
+
 // eslint-disable-next-line no-process-env
-app.listen(process.env.PORT || 3456, () => {
-	// eslint-disable-next-line no-console
-	console.log('Isodist server listening on port 3456!');
+app.listen(httpPort, () => {
+	log.success(`Isodist server listening on port ${httpPort}!`);
 });
 
 // Parse the parameter and call isodist
@@ -48,13 +49,42 @@ function run(options) {
 	options.steps = _.map(options.steps, 'distance');
 
 	options = _.defaults(options, {
-		resolution: 0.1,
+		deintersect: false,
 		hexSize: 0.5,
-		deintersect: false
+		profile: 'car',
+		provider: 'osrm',
+		resolution: 0.2
 	});
 
-	const mapName = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
-	const osrm = new OSRM(mapName);
+	if (VALID_PROVIDERS.indexOf(options.provider) === -1) {
+		throw new Error(`Invalid provider (${options.provider})`);
+	}
 
-	return IsoDist(options.origin, options.steps, options, osrm);
+	switch(options.provider) {
+		case 'osrm':
+			if (options.endpoint) {
+				if (options.map) {
+					log.fail('Ambigious parameters where given (--endpoint and --map). Please only use 1 of them!');
+				}
+			} else {
+				if (!options.map) {
+					log.fail('Missing OSRM map name, if no endpoint is given');
+				}
+
+				/**
+				 * Resolve the options path
+				 */
+				const mapName = Path.resolve(__dirname, `../data/osrm/${options.map}.osrm`);
+				options.osrm = new OSRM(mapName);
+			}
+			break;
+		
+		case 'valhalla':
+			if (!options.endpoint) {
+				log.fail('Missing endpoint for provider: valhalla');
+			}
+			break;
+	}
+
+	return IsoDist(options.origin, options.steps, options);
 }

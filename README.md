@@ -12,6 +12,7 @@ sudo apt install build-essential curl file git libtbb2 libtbb-dev lua5.3 liblua5
 ```sh
 $ git clone git@github.com:locr-company/isodist.git
 $ cd isodist
+$ git submodule update --init --recursive
 $ npm install
 ```
 

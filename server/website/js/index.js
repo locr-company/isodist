@@ -1,6 +1,6 @@
 class IsoDistDemo {
 	constructor() {
-		this._center = [ 52.3703, 9.86557 ];
+		this._center = [ 53.0758196, 8.8071646 ];
 		this._map = L.map('map').setView(this._center, 13);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -142,7 +142,7 @@ class IsoDistDemo {
 				type: 'Point',
 				coordinates: [ center.lng, center.lat ]
 			},
-			map: 'niedersachsen-latest',
+			map: 'bremen',
 			steps: steps,
 			resolution: this.Resolution,
 			hexSize: this.HexSize,

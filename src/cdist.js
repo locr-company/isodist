@@ -1,49 +1,148 @@
 /**
  * cdist.js
  *
- * @author  Denis Luchkin-Zhou <denis@ricepo.com>
- * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
+ * @author  Ringo Leese <r.leese@locr.com>
+ * @license MIT
  */
-const _			= require('lodash');
-const log		= require('./util/log');
+const _		= require('lodash');
+const log	= require('./util/log');
+const http	= require('http');
+const https	= require('https');
 
-function routeOSRM(osrm, options) {
+function routeOSRM(option, options) {
 	return new Promise((resolve, reject) => {
-		if (!options.coordinates) {
-			reject();
-			return;
-		}
-		const coordinates = options.coordinates;
-
+		const coordinates = option.coordinates;
 		const routeOptions = {
 			coordinates: [
 				[ coordinates[0][1], coordinates[0][0] ],
 				[ coordinates[1][1], coordinates[1][0] ]
 			]
 		};
-		osrm.route(routeOptions, (err, results) => {
-			if (err) {
-				return reject(err);
+		if (options.osrm) {
+			options.osrm.route(routeOptions, (err, results) => {
+				if (err) {
+					return reject(err);
+				}
+	
+				return resolve(results);
+			});
+		} else {
+			const url = `${options.endpoint}${options.profile}/${coordinates[0][1]},${coordinates[0][0]};${coordinates[1][1]},${coordinates[1][0]}`;
+			const restCallback = res => {
+				const { statusCode } = res;
+				const contentType = res.headers['content-type'];
+				let error;
+
+				if (statusCode !== 200) {
+					error = new Error(`invalid statusCode(${statusCode}) from server.`);
+				}
+				if (!contentType.match(/application\/json/)) {
+					error = new Error(`invalid contentType(${contentType}) from server.`);
+				}
+				if (error) {
+					res.resume();
+					return reject(error);
+				}
+
+				res.setEncoding('utf8');
+				let rawData = '';
+				res.on('data', chunk => rawData += chunk);
+				res.on('end', () => {
+					try {
+						const parsedData = JSON.parse(rawData);
+						return resolve(parsedData);
+					} catch(e) {
+						return reject(e);
+					}
+				});
+			};
+			if (url.indexOf('https') === 0) {
+				https.get(url, restCallback).on('error', reject);
+			} else {
+				http.get(url, restCallback).on('error', reject);
+			}
+		}
+	});
+}
+
+function routeValhalla(option, options) {
+	return new Promise((resolve, reject) => {
+		const coordinates = option.coordinates;
+
+		const url = options.endpoint;
+		const postData = {
+			locations: [{
+				lat: coordinates[0][0],
+				lon: coordinates[0][1],
+				type: 'break'
+			}, {
+				lat: coordinates[1][0],
+				lon: coordinates[1][1],
+				type: 'break'
+			}],
+			costing: 'auto',
+			directions_options: {
+				units: 'kilometers',
+				format: 'osrm'
+			}
+		};
+		
+		const restCallback = res => {
+			const { statusCode } = res;
+			const contentType = res.headers['content-type'];
+			let error;
+
+			if (statusCode !== 200) {
+				error = new Error(`invalid statusCode(${statusCode}) from server.`);
+			}
+			if (!contentType.match(/application\/json/)) {
+				error = new Error(`invalid contentType(${contentType}) from server.`);
+			}
+			if (error) {
+				res.resume();
+				return reject(error);
 			}
 
-			return resolve(results);
-		});
+			res.setEncoding('utf8');
+			let rawData = '';
+			res.on('data', chunk => rawData += chunk);
+			res.on('end', () => {
+				try {
+					const parsedData = JSON.parse(rawData);
+					return resolve(parsedData);
+				} catch(e) {
+					return reject(e);
+				}
+			});
+		};
+		const postOptions = {
+			method: 'POST'
+		};
+		let req;
+		if (url.indexOf('https') === 0) {
+			req = https.request(url, postOptions, restCallback);
+		} else {
+			req = http.request(url, postOptions, restCallback);
+		}
+		req.on('error', reject);
+		req.write(JSON.stringify(postData));
+		req.end();
 	});
 }
 
 /**
  * Generates distance from origin to each point
  *
- * @param  {Object} osrm OSRM-class
- * @param  {Object} origin GeoJSON point representing the origin
- * @param  {Object} pgrid GeoJSON FeatureCollection of points
- * @return {Object}       pgrid with distance metrics assigned
+ * @param	{Object}	origin	GeoJSON point representing the origin
+ * @param	{Object}	pgrid	GeoJSON FeatureCollection of points
+ * @param	{Object}	options 
+ * @return {Object}	pgrid with distance metrics assigned
  */
-async function cdist(osrm, origin, pgrid) {
+async function cdist(origin, pgrid, options) {
 	/**
 	 * Default option values
 	 */
-	const options = {
+	const chunkOptions = {
 		chunkSize: 1000,
 		delay: 0
 	};
@@ -51,7 +150,7 @@ async function cdist(osrm, origin, pgrid) {
 	/**
 	 * Separate into chunks
 	 */
-	const chunks = _.chunk(pgrid.features, options.chunkSize);
+	const chunks = _.chunk(pgrid.features, chunkOptions.chunkSize);
 
 	/**
 	 * Create the mapping function
@@ -67,8 +166,17 @@ async function cdist(osrm, origin, pgrid) {
 			json: true // Automatically parses the JSON string in the response
 		};
 		try {
-			const result = await routeOSRM(osrm, option);
-			feature.properties.distance = result.routes.length > 0 ? result.routes[0].distance * 0.001 : Number.MAX_VALUE;
+			let result;
+			switch(options.provider) {
+				case 'osrm':
+					result = await routeOSRM(option, options);
+					break;
+				
+				case 'valhalla':
+					result = await routeValhalla(option, options);
+					break;
+			}
+			feature.properties.distance = (result && result.routes.length > 0) ? result.routes[0].distance * 0.001 : Number.MAX_VALUE;
 		} catch (error) {
 			// console.log(error);
 		}
