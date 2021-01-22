@@ -56,16 +56,18 @@ cd "${WORKING_DIRECTORY}"
 #
 # Prepares the .osm data files in valhalla directory
 #
-
 mkdir -p data/valhalla
 cd data
-valhalla_build_config --mjolnir-tile-dir ${PWD}/valhalla/tiles --mjolnir-tile-extract ${PWD}/valhalla/valhalla_tiles.tar --mjolnir-timezone ${PWD}/valhalla/timezones.sqlite --mjolnir-admin ${PWD}/valhalla/admins.sqlite > ${PWD}/valhalla/valhalla.json
+VALHALLA_BUILD_CONFIG="../third_party/valhalla/scripts/valhalla_build_config"
+$VALHALLA_BUILD_CONFIG --mjolnir-tile-dir ${PWD}/valhalla/tiles --mjolnir-tile-extract ${PWD}/valhalla/valhalla_tiles.tar --mjolnir-timezone ${PWD}/valhalla/timezones.sqlite --mjolnir-admin ${PWD}/valhalla/admins.sqlite > ${PWD}/valhalla/valhalla.json
 cd valhalla
+VALHALLA_BUILD_ADMINS="../../third_party/valhalla/build/valhalla_build_admins"
+VALHALLA_BUILD_TILES="../../third_party/valhalla/build/valhalla_build_tiles"
 for f in ../*.osm.pbf; do
 	base=$(basename "$f" .osm.pbf)
 
-	valhalla_build_admins -c valhalla.json ../$base.osm.pbf
-	valhalla_build_tiles -c valhalla.json ../$base.osm.pbf
+	$VALHALLA_BUILD_ADMINS -c valhalla.json ../$base.osm.pbf
+	$VALHALLA_BUILD_TILES -c valhalla.json ../$base.osm.pbf
 	find tiles | sort -n | tar cf valhalla_tiles.tar --no-recursion -T -
 
 	break

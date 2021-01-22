@@ -15,9 +15,22 @@ const Express		= require('express');
 const { IsoDist, VALID_PROVIDERS }	= require('..');
 const OSRM			= require('osrm');
 const Path			= require('path');
+const Yargs			= require('yargs');
 const log			= require('../src/util/log');
 
 const apiTimeout = 30 * 60 * 1000;
+
+/**
+ * Process CLI arguments
+ */
+const argv = Yargs
+	.default('osrm-use-node-binding', false)
+	.boolean('osrm-use-node-binding')
+	.default('osrm-endpoint', 'http://127.0.0.1:5000/route/v1/')
+	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
+	.default('valhalla-endpoint', 'http://127.0.0.1:8002/route')
+	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/route)')
+	.argv;
 
 const app = Express();
 app.use(Cors());
@@ -48,8 +61,16 @@ function run(options) {
 	options.data = _.keyBy(options.steps, 'distance');
 	options.steps = _.map(options.steps, 'distance');
 
+	let endpoint = '';
+	if (options.provider === 'osrm') {
+		endpoint = argv['osrm-endpoint'];
+	} else if (options.provider === 'valhalla') {
+		endpoint = argv['valhalla-endpoint'];
+	}
+
 	options = _.defaults(options, {
 		deintersect: false,
+		endpoint: endpoint,
 		hexSize: 0.5,
 		profile: 'car',
 		provider: 'osrm',
@@ -62,15 +83,10 @@ function run(options) {
 
 	switch(options.provider) {
 		case 'osrm':
-			if (options.endpoint) {
-				if (options.map) {
-					log.fail('Ambigious parameters where given (--endpoint and --map). Please only use 1 of them!');
-				}
-			} else {
+			if (argv['osrm-use-node-binding']) {
 				if (!options.map) {
 					log.fail('Missing OSRM map name, if no endpoint is given');
 				}
-
 				/**
 				 * Resolve the options path
 				 */

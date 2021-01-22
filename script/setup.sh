@@ -61,7 +61,6 @@ mkdir -p build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DENABLE_DATA_TOOLS=On -DENABLE_PYTHON_BINDINGS=On -DENABLE_NODE_BINDINGS=Off -DENABLE_SERVICES=On
 make -j $(nproc)
-sudo make install
 cd "${WORKING_DIRECTORY}"
 
 sudo ldconfig

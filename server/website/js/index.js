@@ -100,6 +100,17 @@ class IsoDistDemo {
 		return noDeburr;
 	}
 
+	get Provider() {
+		let provider = '';
+
+		const providerSelect = document.getElementById('isodist-provider');
+		if (providerSelect instanceof HTMLSelectElement) {
+			provider = providerSelect.value;
+		}
+
+		return provider;
+	}
+
 	get Resolution() {
 		let resolution = 1;
 
@@ -143,11 +154,12 @@ class IsoDistDemo {
 				coordinates: [ center.lng, center.lat ]
 			},
 			map: 'bremen',
-			steps: steps,
-			resolution: this.Resolution,
+			deintersect: true,
 			hexSize: this.HexSize,
 			noDeburr: this.NoDeburr,
-			deintersect: true
+			provider: this.Provider,
+			resolution: this.Resolution,
+			steps: steps
 		};
 	
 		const options = {
@@ -350,6 +362,25 @@ L.Control.IsoDist = L.Control.extend({
 		const tFoot = document.createElement('tfoot');
 		table.appendChild(tBody);
 		table.appendChild(tFoot);
+
+		const tRowProvider = document.createElement('tr');
+		const tColProvider1 = document.createElement('td');
+		tColProvider1.appendChild(document.createTextNode('provider'));
+		const tColProvider2 = document.createElement('td');
+		const providerSelect = document.createElement('select')
+		providerSelect.id = 'isodist-provider';
+		providerSelect.style.width = '100%';
+		const providers = ['osrm', 'valhalla'];
+		for(const provider of providers) {
+			const providerOption = document.createElement('option');
+			providerOption.value = provider;
+			providerOption.appendChild(document.createTextNode(provider));
+			providerSelect.appendChild(providerOption);
+		}
+		tColProvider2.appendChild(providerSelect);
+		tRowProvider.appendChild(tColProvider1);
+		tRowProvider.appendChild(tColProvider2);
+		tBody.appendChild(tRowProvider);
 
 		const tRowDistance1 = buildNumberInputRow('distance 1 (km):', 'isodist-distance-1', { value: 2, min: 0.1, step: 0.1 });
 		tBody.appendChild(tRowDistance1);
