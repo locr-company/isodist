@@ -169,7 +169,7 @@ class IsoDistDemo {
 			},
 			body: JSON.stringify(inputJson)
 		};
-		fetch('/', options)
+		fetch('/api/', options)
 			.then(res => res.json())
 			.then(json => {
 				if (applyChangesButton instanceof HTMLButtonElement) {

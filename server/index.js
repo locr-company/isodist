@@ -37,13 +37,112 @@ app.use(Cors());
 app.use(BodyParser.json());
 app.use(Express.static('website'));
 
-app.post('/', (req, res) => {
+app.post('/api/', (req, res) => {
 	req.setTimeout(apiTimeout);
 	run(req.body)
 		.then((data) => {
 			res.json(data);
 		})
 		.catch((err) => {
+			log.warn(err);
+			res.status(500).send('Something broke!');
+		});
+});
+app.get('/api/', (req, res) => {
+	const query = req.query;
+	const distances = [];
+	if (!query.distances) {
+		log.fail('Missing required parameter "distances".');
+	}
+	const distancesSplitted = query.distances.split(',');
+	let distanceCounter = 0;
+	for(const distanceSplit of distancesSplitted) {
+		distanceCounter++;
+		const distance = parseFloat(distanceSplit);
+		if (isNaN(distance)) {
+			log.fail(`invalid distance[${distanceCounter}] => ${distanceSplit}`);
+		}
+		distances.push({
+			distance: distance
+		});
+	}
+	if (!query.latitude) {
+		log.fail('Missing required parameter "latitude".');
+	}
+	if (!query.longitude) {
+		log.fail('Missing required parameter "latitude".');
+	}
+	const latitude = parseFloat(query.latitude);
+	const longitude = parseFloat(query.longitude);
+	if (isNaN(latitude)) {
+		log.fail(`Invalid "latitude" value => ${query.latitude}`);
+	}
+	if (isNaN(longitude)) {
+		log.fail(`Invalid "longitude" value => ${query.longitude}`);
+	}
+	let hexSize = 0.5;
+	if (query['hex_size']) {
+		hexSize = parseFloat(query['hex_size']);
+		if (isNaN(hexSize)) {
+			log.fail(`Invalid "hex_size" value => ${query['hex_size']}`);
+		}
+		if (hexSize <= 0) {
+			log.fail(`Invalid "hex_size" value => ${hexSize}. It must be greater than 0.`);
+		}
+	}
+	let resolution = 0.2;
+	if (query.resolution) {
+		resolution = parseFloat(query.resolution);
+		if (isNaN(resolution)) {
+			log.fail(`Invalid "resolution" value => ${query.resolution}`);
+		}
+		if (resolution <= 0) {
+			log.fail(`Invalid "resolution" value => ${resolution}. It must be greater than 0.`);
+		}
+	}
+	let deintersect = false;
+	if (query.deintersect) {
+		switch(query.deintersect) {
+			case '1':
+			case 'true':
+			case 'yes':
+			case 'on':
+				deintersect = true;
+				break;
+		}
+	}
+	let noDeburr = false;
+	if (query.noDeburr) {
+		switch(query.noDeburr) {
+			case '1':
+			case 'true':
+			case 'yes':
+			case 'on':
+				noDeburr = true;
+				break;
+		}
+	}
+
+	const options = {
+		origin: {
+			type: 'Point',
+			coordinates: [ longitude, latitude ]
+		},
+		map: query.map || '',
+		deintersect: deintersect,
+		hexSize: hexSize,
+		noDeburr: noDeburr,
+		provider: query.provider || 'osrm',
+		profile: query.profile || 'car',
+		resolution: resolution,
+		steps: distances
+	};
+
+	run(options)
+		.then(data => {
+			res.json(data);
+		})
+		.catch(err => {
 			log.warn(err);
 			res.status(500).send('Something broke!');
 		});
@@ -58,7 +157,7 @@ app.listen(httpPort, () => {
 
 // Parse the parameter and call isodist
 function run(options) {
-	options.data = _.keyBy(options.steps, 'distance');
+options.data = _.keyBy(options.steps, 'distance');
 	options.steps = _.map(options.steps, 'distance');
 
 	let endpoint = '';
