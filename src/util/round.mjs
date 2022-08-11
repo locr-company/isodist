@@ -11,7 +11,7 @@ const C = Math.pow(10, 6);
  * @param  {[type]} feature [description]
  * @return {[type]}         [description]
  */
-function round(feature) {
+export default function round(feature) {
 	const coords = feature.geometry.coordinates[0];
 	feature.geometry.coordinates[0] = coords
 		.map(i => [
@@ -20,5 +20,3 @@ function round(feature) {
 		]);
 	return feature;
 }
-
-module.exports = round;

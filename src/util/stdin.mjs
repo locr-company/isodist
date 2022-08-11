@@ -4,9 +4,9 @@
  * @author  Denis Luchkin-Zhou <denis@ricepo.com>
  * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
  */
-const Bluebird     = require('bluebird');
+import Bluebird from 'bluebird';
 
-function stdin() {
+export default function stdin() {
 	return new Bluebird(
 		(resolve, reject) => {
 			const stream = process.stdin;
@@ -30,5 +30,3 @@ function stdin() {
 		}
 	);
 }
-
-module.exports = stdin;

@@ -4,10 +4,10 @@
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
  */
-const _		= require('lodash');
-const log	= require('./util/log');
-const http	= require('http');
-const https	= require('https');
+import _ from 'lodash';
+import log from './util/log.mjs';
+import http from 'http';
+import https from 'https';
 
 function routeOSRM(option, options) {
 	return new Promise((resolve, reject) => {
@@ -138,7 +138,7 @@ function routeValhalla(option, options) {
  * @param	{Object}	options 
  * @return {Object}	pgrid with distance metrics assigned
  */
-async function cdist(origin, pgrid, options) {
+export default async function cdist(origin, pgrid, options) {
 	/**
 	 * Default option values
 	 */
@@ -194,5 +194,3 @@ async function cdist(origin, pgrid, options) {
 
 	return pgrid;
 }
-
-module.exports = cdist;

@@ -9,18 +9,23 @@
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-const _			= require('lodash');
-const log		= require('../src/util/log');
-const OSRM		= require('osrm');
-const Path		= require('path');
-const { IsoDist, VALID_PROVIDERS }	= require('..');
-const StdIn		= require('../src/util/stdin');
-const Yargs		= require('yargs');
+import _ from 'lodash';
+import log from '../src/util/log.mjs';
+import OSRM from 'osrm';
+import Path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath }  from 'url';
+import { IsoDist, VALID_PROVIDERS }	from '../src/index.mjs';
+import StdIn from '../src/util/stdin.mjs';
+import Yargs from 'yargs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Process CLI arguments
  */
-const argv = Yargs
+const argv = Yargs(process.argv)
 	.alias('m', 'map')
 	.describe('map', 'OSRM file to use for routing')
 	.alias('s', 'step')

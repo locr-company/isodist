@@ -4,12 +4,12 @@
  * @author  Denis Luchkin-Zhou <denis@ricepo.com>
  * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
  */
-const _            = require('lodash');
-const log          = require('./util/log');
-const round        = require('./util/round');
-const Turf         = require('@turf/turf');
+import _ from 'lodash';
+import log from './util/log.mjs';
+import round from './util/round.mjs';
+import * as Turf from '@turf/turf';
 
-function trace(pgrid, d, opts, origin) {
+export default function trace(pgrid, d, opts, origin) {
 	/**
 	 * Filter out points not within step range
 	 */
@@ -62,5 +62,3 @@ function trace(pgrid, d, opts, origin) {
 	log.success(`Processing d=${d}`);
 	return polygon;
 }
-
-module.exports = trace;

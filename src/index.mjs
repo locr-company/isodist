@@ -7,12 +7,12 @@
  * @license MIT
  */
 /* eslint no-loop-func: 1 */
-const _		= require('lodash');
-const Turf	= require('@turf/turf');
-const bbox	= require('./bbox');
-const cdist	= require('./cdist');
-const log	= require('./util/log');
-const trace	= require('./trace');
+import _ from 'lodash';
+import * as Turf from '@turf/turf';
+import bbox from './bbox.mjs';
+import cdist from './cdist.mjs';
+import log from './util/log.mjs';
+import trace from './trace.mjs';
 
 /**
  * Kink coefficient
@@ -114,4 +114,4 @@ async function IsoDist(origin, steps, options) {
 	return Turf.featureCollection(post);
 }
 
-module.exports = { IsoDist, VALID_PROVIDERS };
+export { IsoDist, VALID_PROVIDERS };

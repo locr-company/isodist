@@ -4,8 +4,8 @@
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
  */
-const Turf	= require('@turf/turf');
-const log	= require('./util/log');
+import * as Turf from '@turf/turf';
+import log from './util/log.mjs';
 
 /**
  * @desc   Generates the bounding rectangle given an origin point and radius in kilometers
@@ -13,7 +13,7 @@ const log	= require('./util/log');
  * @param  {Number}    radius   Radius of the bounding box, in kilometers
  * @return {Number[]}           Turf.js bounding box
  */
-function bbox(center, radius) {
+export default function bbox(center, radius) {
 	log('Computing bounding box...');
 
 	const turfCenter = Turf.point(center.coordinates);
@@ -26,4 +26,3 @@ function bbox(center, radius) {
 	log.success('Computing bounding box');
 	return Turf.bbox(fc);
 }
-module.exports = bbox;

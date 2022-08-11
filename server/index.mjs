@@ -8,28 +8,28 @@
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-const _				= require('lodash');
-const BodyParser	= require('body-parser');
-const Cors			= require('cors');
-const Express		= require('express');
-const { IsoDist, VALID_PROVIDERS }	= require('..');
-const OSRM			= require('osrm');
-const Path			= require('path');
-const Yargs			= require('yargs');
-const log			= require('../src/util/log');
+import _ from 'lodash';
+import BodyParser from 'body-parser';
+import Cors from 'cors';
+import Express from 'express';
+import { IsoDist, VALID_PROVIDERS } from '../src/index.mjs';
+import OSRM from 'osrm';
+import Path from 'path';
+import Yargs from 'yargs';
+import log from '../src/util/log.mjs';
 
 const apiTimeout = 30 * 60 * 1000;
 
 /**
  * Process CLI arguments
  */
-const argv = Yargs
+const argv = Yargs(process.argv)
 	.default('osrm-use-node-binding', false)
 	.boolean('osrm-use-node-binding')
-	.default('osrm-endpoint', 'http://127.0.0.1:5000/route/v1/')
-	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
-	.default('valhalla-endpoint', 'http://127.0.0.1:8002/route')
-	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/route)')
+	.default('osrm-endpoint', 'http://127.0.0.1:5000/route/v1/') // Devskim: ignore DS137138
+	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/route/v1/)') // Devskim: ignore DS137138
+	.default('valhalla-endpoint', 'http://127.0.0.1:8002/route') // Devskim: ignore DS137138
+	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/route)') // Devskim: ignore DS137138
 	.argv;
 
 const app = Express();
@@ -157,7 +157,7 @@ app.listen(httpPort, () => {
 
 // Parse the parameter and call isodist
 function run(options) {
-options.data = _.keyBy(options.steps, 'distance');
+	options.data = _.keyBy(options.steps, 'distance');
 	options.steps = _.map(options.steps, 'distance');
 
 	let endpoint = '';
