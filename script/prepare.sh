@@ -30,7 +30,7 @@ fi
 if [ ! -f profiles/car.lua ]; then
 	mkdir -p profiles
 	cd profiles
-	ln -s ../../../third_party/osrm-backend/profiles/car.lua car.lua
+	ln -s -f ../../../third_party/osrm-backend/profiles/car.lua car.lua
 	cd ..
 fi
 
