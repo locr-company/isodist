@@ -1,6 +1,3 @@
-[submodule "third_party/osrm-backend"]
-	path = third_party/osrm-backend
-	url = https://github.com/Project-OSRM/osrm-backend.git
 [submodule "third_party/valhalla"]
 	path = third_party/valhalla
 	url = https://github.com/valhalla/valhalla.git
