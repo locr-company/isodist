@@ -23,7 +23,7 @@ cd isodist
 ### 1.2. Build podman image, create and start container
 
 ```bash
-./scripts/install_service.sh
+./script/install_service.sh
 ```
 
 ### 1.3. Add nginx config
