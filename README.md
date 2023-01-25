@@ -3,6 +3,47 @@
 This package can compute isodistance polygons based on driving distance.  
 This repository is originally forked from https://github.com/ricepo/isodist
 
+## 1. IsoDist Service Installation (Ubuntu 22.04)
+
+### 1.1. Prerequisites
+
+If something should differ from the defaults, set the environment variables for the install and update script and add them to `~/.bashrc`!
+
+```bash
+export ISODIST_NAME=isodist # optional (default: isodist)
+```
+
+Download this repository
+
+```bash
+git clone git@github.com:locr-company/isodist.git
+cd isodist
+```
+
+### 1.2. Build podman image, create and start container
+
+```bash
+./scripts/install_service.sh
+```
+
+### 1.3. Add nginx config
+
+```bash
+sudo cp nginx/isodist /etc/nginx/conf.d
+```
+
+ensure, that the following line(s) exists in /etc/nginx/sites-enabled/{server-config}
+
+```nginx
+server {
+  ...
+  include conf.d/isodist;
+  ...
+}
+```
+
+## 2. Old installation description
+
 ## Prerequisites for Ubuntu 20.04
 ```sh
 sudo apt install build-essential curl file git libtbb2 libtbb-dev lua5.3 liblua5.3-0 liblua5.3-dev libluabind-dev
