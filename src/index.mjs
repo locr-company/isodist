@@ -26,6 +26,7 @@ const KINK_COEFF = 2.0;
 const MAX_RETRIES = 10;
 
 const VALID_PROVIDERS = ['osrm', 'valhalla'];
+const DEFAULT_PROVIDER = 'valhalla';
 
 /**
  * @param {GeoJSON} origin Example: { type: "Point", coordinates: [ 9.86557, 52.3703 ] }
@@ -114,4 +115,4 @@ async function IsoDist(origin, steps, options) {
 	return Turf.featureCollection(post);
 }
 
-export { IsoDist, VALID_PROVIDERS };
+export { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS };

@@ -31,7 +31,4 @@ log.fail = function(data) {
 	write(`${chalk.bold.red('FAIL')} ${data}`);
 	// eslint-disable-next-line no-console
 	console.error('');
-	const err = new Error(data);
-	err.known = true;
-	throw err;
 };

@@ -1,0 +1,214 @@
+openapi: 3.0.0
+servers:
+  - description: IsoDist Demo Server
+    url: 'http://localhost:3456/api'
+info:
+  description: An API for IsoDist mapping
+  version: 1.0.0
+  title: IsoDist API
+  contact:
+    email: r.leese@locr.com
+    name: Ringo Leese
+paths:
+  /:
+    get:
+      summary: Calculate IsoDist data
+      operationId: calcIsoDistGet
+      parameters:
+        - $ref: '#/components/parameters/deintersectParam'
+        - $ref: '#/components/parameters/distancesParam'
+        - $ref: '#/components/parameters/hexSizeParam'
+        - $ref: '#/components/parameters/latitudeParam'
+        - $ref: '#/components/parameters/longitudeParam'
+        - $ref: '#/components/parameters/noDeburrParam'
+        - $ref: '#/components/parameters/profileParam'
+        - $ref: '#/components/parameters/providerParam'
+        - $ref: '#/components/parameters/resolutionParam'
+      responses:
+        200:
+          description: successfully calculated the IsoDist data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeoJsonResult'
+        400:
+          description: if a parameter is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResult'
+    post:
+      summary: Calculate IsoDist data
+      operationId: calcIsoDistPost
+      requestBody:
+        description: JSON object with parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deintersect:
+                  $ref: '#/components/parameters/deintersectParam'
+                distances:
+                  $ref: '#/components/parameters/distancesArrayParam'
+                origin:
+                  $ref: '#/components/parameters/originParam'
+                profile:
+                  $ref: '#/components/parameters/profileParam'
+                provider:
+                  $ref: '#/components/parameters/providerParam'
+                resolution:
+                  $ref: '#/components/parameters/resolutionParam'
+      responses:
+        200:
+          description: successfully calculated the IsoDist data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeoJsonResult'
+        400:
+          description: if a parameter is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResult'
+components:
+  parameters:
+    deintersectParam:
+      name: deintersect
+      in: query
+      description: Deintersect the polygons. If set, the polygons are mutually exclusive
+      schema:
+        type: boolean
+      example: true
+    distancesParam:
+      name: distances
+      in: query
+      description: Distance values, separated by "," and in kilometers.
+      required: true
+      type: array
+      items:
+        type: number
+      example: 1,2,3
+    distancesArrayParam:
+      name: distances
+      in: query
+      description: Distance values in kilometers.
+      required: true
+      type: array
+      items:
+        type: object
+      example: [{distance: 1}, {distance: 2}, {distance: 3}]
+    hexSizeParam:
+      name: hex_size
+      in: query
+      description: The hex-size or granularity of the grid to request (default 0.5). Default unit is km.
+      schema:
+        type: number
+      example: 0.5
+    latitudeParam:
+      name: latitude
+      in: query
+      description: A latitude value from -90.0 and 90.0.
+      required: true
+      schema:
+        type: number
+      example: 52.276406
+    longitudeParam:
+      name: longitude
+      in: query
+      description: A longitude value from -180.0 and 180.0.
+      required: true
+      schema:
+        type: number
+      example: 10.5346
+    noDeburrParam:
+      name: no_deburr
+      in: query
+      description: This flag instructs `isodist` not to remove isolated "islands" from isodistance geometries.
+      schema:
+        type: boolean
+      example: true
+    originParam:
+      name: origin
+      description: The Origin as geojson formatted string
+      required: true
+      schema:
+        type: object
+      example: {type: 'Point', coordinates: [10.5346, 52.276406]}
+    profileParam:
+      name: profile
+      in: query
+      description: 'The routing profile to use, if available (e.g.: car, motorcycle, bike, pedestrian)'
+      schema:
+        type: string
+      example: car
+    providerParam:
+      name: provider
+      in: query
+      description: The provider to use for calculating the IsoChrone data.
+      enum:
+        - osrm
+        - valhalla
+      example: valhalla
+    resolutionParam:
+      name: resolution
+      in: query
+      description: Sampling resolution of the underlying point grid. Default is 0.2
+      schema:
+        type: number
+      example: 0.2
+  schemas:
+    BadRequestResult:
+      type: object
+      properties:
+        code:
+          type: number
+          example: 400
+        status:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Invalid "latitude" value => foo
+    GeoJsonFeature:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Feature
+        properties:
+          $ref: '#/components/schemas/GeoJsonProperty'
+        geometry:
+          $ref: '#/components/schemas/GeoJsonGeometry'
+    GeoJsonGeometry:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Polygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: number
+            example: [[10.5406, 52.295458], [10.540164, 52.293842], [10.538924, 52.293406]]
+    GeoJsonProperty:
+      type: object
+      properties:
+        distance:
+          type: number
+          example: 3
+    GeoJsonResult:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "FeatureCollection"
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoJsonFeature'

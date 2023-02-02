@@ -16,17 +16,30 @@ export ISODIST_NAME=isodist # optional (default: isodist)
 Download this repository
 
 ```bash
-git clone git@github.com:locr-company/isodist.git
+git clone https://github.com/locr-company/isodist.git
 cd isodist
 ```
 
+Download and install [Valhalla](https://github.com/valhalla/valhalla) or [OSRM](https://github.com/Project-OSRM/osrm-backend) to use the appropriate provider!
+
 ### 1.2. Build podman image, create and start container
 
+#### 1.2.1. For producation systems
+
 ```bash
-./script/install_service.sh
+./scripts/install_service.sh
 ```
 
-### 1.3. Add nginx config
+#### 1.2.2. For developments systems
+
+```bash
+podman build --tag=isodist-dev --build-arg environment=dev .
+podman run --rm -it -v ${PWD}:/app --network=host --name=isodist-dev isodist-dev /bin/bash
+npm install
+npm start
+```
+
+### 1.3. Add nginx config (optional)
 
 ```bash
 sudo cp nginx/isodist /etc/nginx/conf.d
@@ -42,47 +55,40 @@ server {
 }
 ```
 
-## 2. Old installation description
+## 2. Using the API
 
-## Prerequisites for Ubuntu 20.04
-```sh
-sudo apt install build-essential curl file git libtbb2 libtbb-dev lua5.3 liblua5.3-0 liblua5.3-dev libluabind-dev
+The default provider is "valhalla" on endpoint: "http://127.0.0.1:8002/route".  
+The distance unit is kilometers.  
+
+### 2.1. Use the REST-API
+
+Go to http://localhost:3456/ to visit the demo website.  
+You can view the API documentation at https://locr-company.github.io/isodist/ or a local version at http://localhost:3456/api-doc/.
+
+```bash
+curl "http://localhost:3456/api/?latitude=52.276406&longitude=10.5346&distances=1,3,5" | jq
 ```
 
-## Getting Started
-```sh
-$ git clone git@github.com:locr-company/isodist.git
-$ cd isodist
-$ git submodule update --init --recursive
-$ npm install
+### 2.2. Use the CLI-API
+
+Via parameters
+
+```bash
+./bin/isodist.mjs --lon=10.5346 --lat=52.276406 -d 1 -d 3 -d 5 | jq
 ```
 
-In order to run `isodist`, you will need to download an `*.osm` file corresponding to the region
-where you want to do your computation. [Geofabrik][1] is a good source of these files.
+Via input.json file
 
-You need to place your OSM files into the `isodist/osrm` directory (create one if it does not exist).
-Then run the following command to generate `.osrm` files:
-```sh
-$ npm run prepare
-```
-
-Finally, you are good to go! In order to generate the graph above, you will need `indiana.osrm` and
-run the following:
-```sh
-$ isodist --lon=-86.893386 --lat=40.417202 -s 2 -s 5 -s 7 -r 0.1 -h 0.5 -m indiana
-```
-
-## Input file
 You can specify all the parameters in an input file that is piped into standard input:
+
 ```json
 /* input.json */
 {
   "origin": {
     "type": "Point",
-    "coordinates": [ -86.893386, 40.417202 ]
+    "coordinates": [ 10.5346, 52.276406 ]
   },
-  "map": "indiana",
-  "steps": [{
+  "distances": [{
       "distance": 2
   }, {
       "distance": 5
@@ -91,14 +97,9 @@ You can specify all the parameters in an input file that is piped into standard 
   }]
 }
 ```
-```sh
-$ isodist < input.json
-```
 
-Please note that CLI arguments always override values specified in the input file.
 ```sh
-$ isodist --map il < input.json
-# The above command will use `osrm/il.osrm`
+$ ./bin/isodist.mjs < input.json
 ```
 
 
@@ -114,19 +115,12 @@ Latitude of the origin point.
 
 Longitude of the origin point.
 
-### `-s, --step`
+### `-d, --distance`
 **Required**.
 
 Distance at which to compute isodistance polygons.
 For example, to compute isodistance polygons at 1, 2, 5 and 10 kilometers, use
-`--step 1 --step 2 --step 5 --step 10`
-
-
-### `-m, --map`
-**Required**.
-
-Name of the `.osrm` file you wish to use for routing.
-
+`--distance 1 --distance 2 --distance 5 --distance 10`
 
 ### `-r, --resolution`
 Optional, default: 0.2

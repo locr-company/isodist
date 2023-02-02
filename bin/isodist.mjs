@@ -11,11 +11,10 @@
 'use strict';
 import _ from 'lodash';
 import log from '../src/util/log.mjs';
-import OSRM from 'osrm';
 import Path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath }  from 'url';
-import { IsoDist, VALID_PROVIDERS }	from '../src/index.mjs';
+import { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS }	from '../src/index.mjs';
 import StdIn from '../src/util/stdin.mjs';
 import Yargs from 'yargs';
 
@@ -26,10 +25,8 @@ const __dirname = dirname(__filename);
  * Process CLI arguments
  */
 const argv = Yargs(process.argv)
-	.alias('m', 'map')
-	.describe('map', 'OSRM file to use for routing')
-	.alias('s', 'step')
-	.describe('step', 'Distances where to compute isodistance polygons')
+	.alias('d', 'distance')
+	.describe('distance', 'Distances where to compute isodistance polygons')
 	.alias('r', 'resolution')
 	.default('r', 0.2)
 	.describe('r', 'Sampling resolution of point grid')
@@ -39,7 +36,7 @@ const argv = Yargs(process.argv)
 	.alias('p', 'profile')
 	.default('p', 'car')
 	.describe('p', 'Routing profile to use (car, motorbike, pedestrian...)')
-	.default('provider', 'osrm')
+	.default('provider', DEFAULT_PROVIDER)
 	.describe('provider', 'Routing provider (osrm, valhalla)')
 	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
 	.boolean('no-deburr')
@@ -54,15 +51,15 @@ const argv = Yargs(process.argv)
 StdIn()
 	.then(options => {
 		/**
-		 * Generate separate steps and data entries
+		 * Generate separate distances and data entries
 		 */
-		options.data = _.keyBy(options.steps, 'distance');
-		options.steps = _.map(options.steps, 'distance');
+		options.data = _.keyBy(options.distances, 'distance');
+		options.distances = _.map(options.distances, 'distance');
 
 		/**
 		 * Generate the origin point if not specified
 		 */
-		if (!options.origin && (!_.isFinite(argv.lat) || !_.isFinite(argv.lon))) {
+		if (!options.origin && (!(_.isFinite(argv.lat) && _.isFinite(argv.lon)))) {
 			log.fail('Could not determine origin location');
 		}
 		if (argv.lat && argv.lon) {
@@ -73,32 +70,42 @@ StdIn()
 		}
 
 		/**
-		 * Generate steps
+		 * Generate distances
 		 */
-		if (argv.step) {
-			options.steps = [].concat(argv.step);
+		if (argv.distance) {
+			options.distances = [].concat(argv.distance);
 		}
-		if (!options.steps || !options.steps.length) {
-			log.fail('Could not determine isodistance steps');
+		if (!options.distances?.length) {
+			log.fail('Could not determine isodistance distances');
 		}
 		const data = {};
-		for(let i = 0; i < options.steps.length; i++) {
-			data[options.steps[i]] = { distance: options.steps[i] };
+		for(let i = 0; i < options.distances.length; i++) {
+			data[options.distances[i]] = { distance: options.distances[i] };
 		}
 
 		options.data = data;
+
+		const provider = argv.provider || DEFAULT_PROVIDER
+		let endpoint = '';
+		switch (provider) {
+			case 'osrm':
+				endpoint = 'http://127.0.0.1:5000/route/v1/';
+				break;
+			case 'valhalla':
+				endpoint = 'http://127.0.0.1:8002/route';
+				break;
+		}
 
 		/**
 		 * Copy over -h, -r and -m
 		 */
 		options = _.defaults(options, {
-			deintersect: argv.deintersect || false,
-			endpoint: argv.endpoint,
+			deintersect: argv.deintersect,
+			endpoint: endpoint,
 			hexSize: argv.h,
-			map: argv.m,
-			noDeburr: argv.noDeburr || false,
+			noDeburr: argv['no-deburr'],
 			profile: argv.profile || 'car',
-			provider: argv.provider || 'osrm',
+			provider,
 			resolution: argv.r
 		});
 
@@ -106,36 +113,10 @@ StdIn()
 			log.fail(`Invalid provider (${options.provider})`);
 		}
 
-		switch(options.provider) {
-			case 'osrm':
-				if (options.endpoint) {
-					if (options.map) {
-						log.fail('Ambigious parameters where given (--endpoint and --map). Please only use 1 of them!');
-					}
-				} else {
-					if (!options.map) {
-						log.fail('Missing OSRM map name, if no endpoint is given');
-					}
-
-					/**
-					 * Resolve the options path
-					 */
-					const mapName = Path.resolve(__dirname, `../osrm/${options.map}.osrm`);
-					options.osrm = new OSRM(mapName);
-				}
-				break;
-			
-			case 'valhalla':
-				if (!options.endpoint) {
-					log.fail('Missing endpoint for provider: valhalla');
-				}
-				break;
-		}
-
 		/**
 		 * Start processing
 		 */
-		return IsoDist(options.origin, options.steps, options);
+		return IsoDist(options.origin, options.distances, options);
 	})
 	.then(fc => {
 		const output = JSON.stringify(fc, null, 2);

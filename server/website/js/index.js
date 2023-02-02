@@ -135,16 +135,16 @@ class IsoDistDemo {
 			applyChangesButton.disabled = true;
 		}
 
-		const steps = [{
+		const distances = [{
 			distance: this.Distance1
 		}];
 		if (this.Distance2 > 0) {
-			steps.push({
+			distances.push({
 				distance: this.Distance2
 			});
 		}
 		if (this.Distance3 > 0) {
-			steps.push({
+			distances.push({
 				distance: this.Distance3
 			});
 		}
@@ -153,13 +153,12 @@ class IsoDistDemo {
 				type: 'Point',
 				coordinates: [ center.lng, center.lat ]
 			},
-			map: 'bremen',
 			deintersect: true,
 			hexSize: this.HexSize,
 			noDeburr: this.NoDeburr,
 			provider: this.Provider,
 			resolution: this.Resolution,
-			steps: steps
+			distances
 		};
 	
 		const options = {
@@ -370,7 +369,7 @@ L.Control.IsoDist = L.Control.extend({
 		const providerSelect = document.createElement('select')
 		providerSelect.id = 'isodist-provider';
 		providerSelect.style.width = '100%';
-		const providers = ['osrm', 'valhalla'];
+		const providers = ['valhalla', 'osrm'];
 		for(const provider of providers) {
 			const providerOption = document.createElement('option');
 			providerOption.value = provider;

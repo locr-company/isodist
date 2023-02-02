@@ -15,74 +15,38 @@
     "url": "https://github.com/locr-company/isodist/issues"
   },
   "bin": {
-    "isodist": "bin/isodist.js"
+    "isodist": "bin/isodist.mjs"
   },
   "files": [
     "src"
   ],
   "license": "MIT",
-  "main": "src/index.js",
+  "main": "src/index.mjs",
   "engines": {
-    "node": ">=12.20.0",
-    "npm": ">=6.14.0"
+    "node": ">=16",
+    "npm": ">=8"
   },
   "scripts": {
-    "install-foo": "./script/setup.sh",
-    "start": "cd server && node index.mjs",
-    "prepare-foo": "./script/prepare.sh"
-  },
-  "devDependencies": {
-    "ava": "~3.15.0",
-    "babel-core": "~6.26.3",
-    "babel-eslint": "~10.1.0",
-    "babel-preset-stage-3": "~6.24.1",
-    "babel-register": "~6.26.0",
-    "del": "~6.0.0",
-    "eslint": "~7.18.0",
-    "eslint-plugin-import": "~2.22.1",
-    "gulp": "~4.0.2",
-    "gulp-babel": "~8.0.0",
-    "gulp-changed": "~4.0.2",
-    "gulp-eslint": "~6.0.0",
-    "gulp-notify": "~3.2.0",
-    "gulp-sourcemaps": "~3.0.0",
-    "is-ci": "~2.0.0",
-    "nyc": "~15.1.0"
+    "start": "cd server && node index.mjs"
   },
   "dependencies": {
     "@mapbox/polyline": "~1.1.1",
-    "axios": "~0.27.2",
     "bluebird": "~3.7.2",
-    "body-parser": "~1.20.0",
-    "chalk": "~5.0.1",
+    "body-parser": "~1.20.1",
+    "chalk": "~5.2.0",
     "cors": "~2.8.5",
-    "express": "~4.18.1",
+    "express": "~4.18.2",
     "lodash": "~4.17.21",
-    "osrm": "github:Project-OSRM/osrm-backend#semver:5.27.1",
     "single-line-log": "~1.1.2",
     "@turf/turf": "~6.5.0",
-    "yargs": "~17.5.1"
+    "yargs": "~17.6.2"
   },
-  "keywords": [],
-  "ava": {
-    "files": [
-      "test/**/*.spec.js"
-    ],
-    "require": [
-      "babel-register"
-    ]
+  "devDependencies": {
+    "eslint": "^8.33.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1"
   },
-  "nyc": {
-    "all": true,
-    "include": [
-      "src/**/*.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "reporter": [
-      "html",
-      "lcov"
-    ]
-  }
+  "keywords": []
 }
