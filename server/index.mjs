@@ -8,7 +8,7 @@
  */
 /* eslint strict: 0, no-process-exit: 0 */
 'use strict';
-import _ from 'lodash';
+
 import BodyParser from 'body-parser';
 import Cors from 'cors';
 import Express from 'express';
@@ -182,8 +182,18 @@ app.listen(httpPort, () => {
 
 // Parse the parameter and call isodist
 function run(options) {
-	options.data = _.keyBy(options.distances, 'distance');
-	options.distances = _.map(options.distances, 'distance');
+	const data = {};
+	const distances = [];
+	if (options.distances instanceof Array) {
+		for(const distanceObj of options.distances) {
+			if (typeof distanceObj.distance === 'number') {
+				data[distanceObj.distance] = distanceObj;
+				distances.push(distanceObj.distance);
+			}
+		}
+	}
+	options.data = data;
+	options.distances = distances;
 
 	let endpoint = '';
 	if (options.provider === 'osrm') {
@@ -192,14 +202,12 @@ function run(options) {
 		endpoint = argv['valhalla-endpoint'];
 	}
 
-	options = _.defaults(options, {
-		deintersect: false,
-		endpoint: endpoint,
-		hexSize: 0.5,
-		profile: 'car',
-		provider: DEFAULT_PROVIDER,
-		resolution: 0.2
-	});
+	options.deintersect = options.deintersect ?? false;
+	options.endpoint = options.endpoint ?? endpoint;
+	options.hexSize = options.hexSize ?? 0.5;
+	options.profile = options.profile ?? 'car';
+	options.provider = options.provider ?? DEFAULT_PROVIDER;
+	options.resolution = options.resolution ?? 0.2;
 
 	if (VALID_PROVIDERS.indexOf(options.provider) === -1) {
 		throw new Error(`Invalid provider (${options.provider})`);

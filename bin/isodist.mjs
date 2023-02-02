@@ -11,7 +11,6 @@
 'use strict';
 import _ from 'lodash';
 import log from '../src/util/log.mjs';
-import Path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath }  from 'url';
 import { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS }	from '../src/index.mjs';
