@@ -18,49 +18,40 @@ function routeOSRM(option, options) {
 				[ coordinates[1][1], coordinates[1][0] ]
 			]
 		};
-		if (options.osrm) {
-			options.osrm.route(routeOptions, (err, results) => {
-				if (err) {
-					return reject(err);
-				}
-	
-				return resolve(results);
-			});
-		} else {
-			const url = `${options.endpoint}${options.profile}/${coordinates[0][1]},${coordinates[0][0]};${coordinates[1][1]},${coordinates[1][0]}`;
-			const restCallback = res => {
-				const { statusCode } = res;
-				const contentType = res.headers['content-type'];
-				let error;
 
-				if (statusCode !== 200) {
-					error = new Error(`invalid statusCode(${statusCode}) from server.`);
-				}
-				if (!contentType.match(/application\/json/)) {
-					error = new Error(`invalid contentType(${contentType}) from server.`);
-				}
-				if (error) {
-					res.resume();
-					return reject(error);
-				}
+		const url = `${options.endpoint}${options.profile}/${coordinates[0][1]},${coordinates[0][0]};${coordinates[1][1]},${coordinates[1][0]}`;
+		const restCallback = res => {
+			const { statusCode } = res;
+			const contentType = res.headers['content-type'];
+			let error;
 
-				res.setEncoding('utf8');
-				let rawData = '';
-				res.on('data', chunk => rawData += chunk);
-				res.on('end', () => {
-					try {
-						const parsedData = JSON.parse(rawData);
-						return resolve(parsedData);
-					} catch(e) {
-						return reject(e);
-					}
-				});
-			};
-			if (url.indexOf('https') === 0) {
-				https.get(url, restCallback).on('error', reject);
-			} else {
-				http.get(url, restCallback).on('error', reject);
+			if (statusCode !== 200) {
+				error = new Error(`invalid statusCode(${statusCode}) from server.`);
 			}
+			if (!contentType.match(/application\/json/)) {
+				error = new Error(`invalid contentType(${contentType}) from server.`);
+			}
+			if (error) {
+				res.resume();
+				return reject(error);
+			}
+
+			res.setEncoding('utf8');
+			let rawData = '';
+			res.on('data', chunk => rawData += chunk);
+			res.on('end', () => {
+				try {
+					const parsedData = JSON.parse(rawData);
+					return resolve(parsedData);
+				} catch(e) {
+					return reject(e);
+				}
+			});
+		};
+		if (url.indexOf('https') === 0) {
+			https.get(url, restCallback).on('error', reject);
+		} else {
+			http.get(url, restCallback).on('error', reject);
 		}
 	});
 }
