@@ -23,27 +23,31 @@ function routeOSRM(option, options) {
 			return reject(new Error(`Not enough coordinates where given (${options.coordinate.length}). Expected at least 2.`));
 		}
 		const coordinates = option.coordinates;
-		const first = coordinates[0];
-		const last = coordinates[coordinates.length - 1];
+		const origin = coordinates[0];
+		const destination = coordinates[coordinates.length - 1];
 
-		if (typeof first[0] !== 'number' || typeof first[1] !== 'number') {
-			return reject(new Error('First coordinate is not a number array.'));
+		if (typeof origin[0] !== 'number' || typeof origin[1] !== 'number') {
+			return reject(new Error('origin coordinate is not a number array.'));
 		}
-		if (typeof last[0] !== 'number' || typeof last[1] !== 'number') {
-			return reject(new Error('Last coordinate is not a number array.'));
+		if (typeof destination[0] !== 'number' || typeof destination[1] !== 'number') {
+			return reject(new Error('destination coordinate is not a number array.'));
 		}
 
-		if (first[0] > 90 || first[0] < -90) {
-			return reject(new Error(`Origin latitude (${first[0]}) is out of range.`));
+		const originLatitude = origin[0];
+		const originLongitude = origin[1];
+		const destinationLatitude = destination[0];
+		const destinationLongitude = destination[1];
+		if (originLatitude > 90 || originLatitude < -90) {
+			return reject(new Error(`Origin latitude (${originLatitude}) is out of range.`));
 		}
-		if (first[1] > 540 || first[1] < -540) {
-			return reject(new Error(`Origin longitude (${first[1]}) is out of range.`));
+		if (originLongitude > 540 || originLongitude < -540) {
+			return reject(new Error(`Origin longitude (${originLongitude}) is out of range.`));
 		}
-		if (last[0] > 90 || last[0] < -90) {
-			return reject(new Error(`Destination latitude (${last[0]}) is out of range.`));
+		if (destinationLatitude > 90 || destinationLatitude < -90) {
+			return reject(new Error(`Destination latitude (${destinationLatitude}) is out of range.`));
 		}
-		if (last[1] > 540 || last[1] < -540) {
-			return reject(new Error(`Destination longitude (${last[1]}) is out of range.`));
+		if (destinationLongitude > 540 || destinationLongitude < -540) {
+			return reject(new Error(`Destination longitude (${destinationLongitude}) is out of range.`));
 		}
 
 		const restCallback = res => {
@@ -76,7 +80,7 @@ function routeOSRM(option, options) {
 		};
 
 		// Devskim: ignore DS137138
-		const url = `http://127.0.0.1:5000/route/v1/${profile}/${first[1]},${first[0]};${last[1]},${last[0]}`;
+		const url = `http://127.0.0.1:5000/route/v1/${profile}/${originLongitude},${originLatitude};${destinationLongitude},${destinationLatitude}`;
 		http.get(url, restCallback).on('error', reject);
 	});
 }
