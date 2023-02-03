@@ -40,7 +40,7 @@ function routeOSRM(coordinates, options) {
 			return reject(new Error(`Origin latitude (${originLatitude}) is out of range.`));
 		}
 		// don't ask! github's security scanner wants it that way!???
-		if (!originLongitude.match(/^-?[0-9]{3}$/)) {
+		if (!originLongitude.match(/^-?[0-9]{1,3}(\.[0-9]+)?$/)) {
 			return reject(new Error(`Origin longitude (${originLongitude}) is out of range.`));
 		}
 		if (destinationLatitude > 90 || destinationLatitude < -90) {
@@ -188,7 +188,7 @@ export default async function cdist(origin, pgrid, options) {
 			}
 			feature.properties.distance = (result && result.routes.length > 0) ? result.routes[0].distance * 0.001 : Number.MAX_VALUE;
 		} catch (error) {
-			// console.log(error);
+			console.log(error);
 		}
 	}
 
