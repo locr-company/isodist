@@ -10,7 +10,21 @@ import http from 'http';
 
 function routeOSRM(option, options) {
 	return new Promise((resolve, reject) => {
+		const profiles = ['car', 'bicycle', 'foo'];
+		if (profiles.indexOf(options.profile) === -1) {
+			return reject(new Error(`Invalid profile: ${options.profile}`));
+		}
+		const profile = options.profile;
+
+		if (!(option.coordinates instanceof Array )) {
+			return reject(new Error('coordinates is not an array'));
+		}
+		if (options.coordinates.length < 2) {
+			return reject(new Error(`Not enough coordinates where given (${options.coordinates.length}). Expected at least 2.`));
+		}
 		const coordinates = option.coordinates;
+		const first = coordinates[0];
+		const last = coordinates[1];
 
 		const restCallback = res => {
 			const { statusCode } = res;
@@ -42,7 +56,7 @@ function routeOSRM(option, options) {
 		};
 
 		// Devskim: ignore DS137138
-		const url = `http://127.0.0.1:5000/route/v1/${options.profile}/${coordinates[0][1]},${coordinates[0][0]};${coordinates[1][1]},${coordinates[1][0]}`;
+		const url = `http://127.0.0.1:5000/route/v1/${profile}/${first[1]},${first[0]};${last[1]},${last[0]}`;
 		http.get(url, restCallback).on('error', reject);
 	});
 }
@@ -96,12 +110,12 @@ function routeValhalla(option, options) {
 				}
 			});
 		};
-		const postOptions = {
+		const requestOptions = {
 			method: 'POST'
 		};
 		// Devskim: ignore DS137138
 		const url = 'http://127.0.0.1:8002/route';
-		const req = http.request(url, postOptions, restCallback);
+		const req = http.request(url, requestOptions, restCallback);
 		req.on('error', reject);
 		req.write(JSON.stringify(postData));
 		req.end();
