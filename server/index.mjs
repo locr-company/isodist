@@ -15,8 +15,11 @@ import Express from 'express';
 import { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS } from '../src/index.mjs';
 import Yargs from 'yargs';
 import log from '../src/util/log.mjs';
+import os from 'os';
 
 const apiTimeout = 30 * 60 * 1000;
+let runningTasks = 0;
+let totalTasks = 0;
 
 /**
  * Process CLI arguments
@@ -70,6 +73,28 @@ function sendInternalServerError(err, res) {
 	res.header('Content-Type', 'application/json');
 	res.json(jsonResult);
 }
+
+app.get('/api/providers/list', (_req, res) => {
+	const json = {
+		providers: VALID_PROVIDERS,
+		default: argv['default-provider']
+	};
+	res.setHeader('Content-Type', 'application/json');
+	res.end(JSON.stringify(json));
+});
+app.get('/api/status', (req, res) => {
+	const json = {
+		machine: {
+			'load-average': os.loadavg()
+		},
+		service: {
+			'running-tasks': runningTasks,
+			'total-tasks': totalTasks
+		}
+	};
+	res.setHeader('Content-Type', 'application/json');
+	res.end(JSON.stringify(json));
+});
 
 app.post('/api/', (req, res) => {
 	req.setTimeout(apiTimeout);
@@ -181,7 +206,7 @@ app.listen(httpPort, () => {
 });
 
 // Parse the parameter and call isodist
-function run(options) {
+async function run(options) {
 	const data = {};
 	const distances = [];
 	if (options.distances instanceof Array) {
@@ -213,5 +238,11 @@ function run(options) {
 		throw new Error(`Invalid provider (${options.provider})`);
 	}
 
-	return IsoDist(options.origin, options.distances, options);
+	try {
+		runningTasks++;
+		totalTasks++;
+		return await IsoDist(options.origin, options.distances, options);
+	} finally {
+		runningTasks--;
+	}
 }
