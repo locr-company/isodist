@@ -37,7 +37,6 @@ const argv = Yargs(process.argv)
 	.describe('p', 'Routing profile to use (car, motorbike, pedestrian...)')
 	.default('provider', DEFAULT_PROVIDER)
 	.describe('provider', 'Routing provider (osrm, valhalla)')
-	.describe('endpoint', 'An http-endpoint to the routing provider (e.g.: http://127.0.0.1:5000/route/v1/)')
 	.boolean('no-deburr')
 	.describe('no-deburr', 'Disable removal of isolated "islands" from isodistance result')
 	.boolean('deintersect')
@@ -85,22 +84,12 @@ StdIn()
 		options.data = data;
 
 		const provider = argv.provider || DEFAULT_PROVIDER
-		let endpoint = '';
-		switch (provider) {
-			case 'osrm':
-				endpoint = 'http://127.0.0.1:5000/route/v1/';
-				break;
-			case 'valhalla':
-				endpoint = 'http://127.0.0.1:8002/route';
-				break;
-		}
 
 		/**
 		 * Copy over -h, -r and -m
 		 */
 		options = _.defaults(options, {
 			deintersect: argv.deintersect,
-			endpoint: endpoint,
 			hexSize: argv.h,
 			noDeburr: argv['no-deburr'],
 			profile: argv.profile || 'car',

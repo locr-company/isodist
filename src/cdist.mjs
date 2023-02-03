@@ -7,19 +7,11 @@
 import _ from 'lodash';
 import log from './util/log.mjs';
 import http from 'http';
-import https from 'https';
 
 function routeOSRM(option, options) {
 	return new Promise((resolve, reject) => {
 		const coordinates = option.coordinates;
-		const routeOptions = {
-			coordinates: [
-				[ coordinates[0][1], coordinates[0][0] ],
-				[ coordinates[1][1], coordinates[1][0] ]
-			]
-		};
 
-		const url = `${options.endpoint}${options.profile}/${coordinates[0][1]},${coordinates[0][0]};${coordinates[1][1]},${coordinates[1][0]}`;
 		const restCallback = res => {
 			const { statusCode } = res;
 			const contentType = res.headers['content-type'];
@@ -48,11 +40,10 @@ function routeOSRM(option, options) {
 				}
 			});
 		};
-		if (url.indexOf('https') === 0) {
-			https.get(url, restCallback).on('error', reject);
-		} else {
-			http.get(url, restCallback).on('error', reject);
-		}
+
+		// Devskim: ignore DS137138
+		const url = `http://127.0.0.1:5000/route/v1/${options.profile}/${coordinates[0][1]},${coordinates[0][0]};${coordinates[1][1]},${coordinates[1][0]}`;
+		http.get(url, restCallback).on('error', reject);
 	});
 }
 
@@ -60,7 +51,6 @@ function routeValhalla(option, options) {
 	return new Promise((resolve, reject) => {
 		const coordinates = option.coordinates;
 
-		const url = options.endpoint;
 		const postData = {
 			locations: [{
 				lat: coordinates[0][0],
@@ -109,12 +99,9 @@ function routeValhalla(option, options) {
 		const postOptions = {
 			method: 'POST'
 		};
-		let req;
-		if (url.indexOf('https') === 0) {
-			req = https.request(url, postOptions, restCallback);
-		} else {
-			req = http.request(url, postOptions, restCallback);
-		}
+		// Devskim: ignore DS137138
+		const url = 'http://127.0.0.1:8002/route';
+		const req = http.request(url, postOptions, restCallback);
 		req.on('error', reject);
 		req.write(JSON.stringify(postData));
 		req.end();

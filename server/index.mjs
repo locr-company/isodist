@@ -13,23 +13,12 @@ import BodyParser from 'body-parser';
 import Cors from 'cors';
 import Express from 'express';
 import { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS } from '../src/index.mjs';
-import Yargs from 'yargs';
 import log from '../src/util/log.mjs';
 import os from 'os';
 
 const apiTimeout = 30 * 60 * 1000;
 let runningTasks = 0;
 let totalTasks = 0;
-
-/**
- * Process CLI arguments
- */
-const argv = Yargs(process.argv)
-	.describe('osrm-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:5000/route/v1/)') // Devskim: ignore DS137138	
-	.default('osrm-endpoint', 'http://127.0.0.1:5000/route/v1/') // Devskim: ignore DS137138
-	.describe('valhalla-endpoint', 'An http-endpoint to the osrm routing provider (e.g.: http://127.0.0.1:8002/route)') // Devskim: ignore DS137138
-	.default('valhalla-endpoint', 'http://127.0.0.1:8002/route') // Devskim: ignore DS137138
-	.argv;
 
 const app = Express();
 app.use(Cors());
@@ -77,7 +66,7 @@ function sendInternalServerError(err, res) {
 app.get('/api/providers/list', (_req, res) => {
 	const json = {
 		providers: VALID_PROVIDERS,
-		default: argv['default-provider']
+		default: DEFAULT_PROVIDER
 	};
 	res.setHeader('Content-Type', 'application/json');
 	res.end(JSON.stringify(json));
@@ -220,15 +209,7 @@ async function run(options) {
 	options.data = data;
 	options.distances = distances;
 
-	let endpoint = '';
-	if (options.provider === 'osrm') {
-		endpoint = argv['osrm-endpoint'];
-	} else if (options.provider === 'valhalla') {
-		endpoint = argv['valhalla-endpoint'];
-	}
-
 	options.deintersect = options.deintersect ?? false;
-	options.endpoint = options.endpoint ?? endpoint;
 	options.hexSize = options.hexSize ?? 0.5;
 	options.profile = options.profile ?? 'car';
 	options.provider = options.provider ?? DEFAULT_PROVIDER;
