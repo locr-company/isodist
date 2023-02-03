@@ -17,14 +17,21 @@ function routeOSRM(option, options) {
 		const profile = options.profile;
 
 		if (!(option.coordinates instanceof Array )) {
-			return reject(new Error('coordinates is not an array'));
+			return reject(new Error('Coordinates is not an array.'));
 		}
 		if (options.coordinates.length < 2) {
 			return reject(new Error(`Not enough coordinates where given (${options.coordinates.length}). Expected at least 2.`));
 		}
 		const coordinates = option.coordinates;
 		const first = coordinates[0];
-		const last = coordinates[1];
+		const last = coordinates[coordinates.length - 1];
+
+		if (typeof first[0] !== 'number' || first[1] !== 'number') {
+			return reject(new Error('First coordinate is not a number array.'));
+		}
+		if (typeof last[0] !== 'number' || last[1] !== 'number') {
+			return reject(new Error('Last coordinate is not a number array.'));
+		}
 
 		const restCallback = res => {
 			const { statusCode } = res;
