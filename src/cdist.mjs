@@ -19,10 +19,10 @@ function routeOSRM(option, options) {
 		if (!(option.coordinates instanceof Array)) {
 			return reject(new Error('Coordinates is not an array.'));
 		}
-		if (option.coordinates.length < 2) {
-			return reject(new Error(`Not enough coordinates where given (${options.coordinate.length}). Expected at least 2.`));
-		}
 		const coordinates = option.coordinates;
+		if (coordinates.length < 2) {
+			return reject(new Error(`Not enough coordinates where given (${coordinates.length}). Expected at least 2.`));
+		}
 		const origin = coordinates[0];
 		const destination = coordinates[coordinates.length - 1];
 
