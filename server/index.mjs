@@ -53,7 +53,7 @@ function sendBadRequest(err, res) {
 	res.json(jsonResult);
 }
 function sendInternalServerError(err, res) {
-	log.warn(err);
+	log.fail(err);
 
 	let message = '';
 	if (err instanceof Error) {
@@ -159,13 +159,13 @@ app.get('/api/', (req, res) => {
 			type: 'Point',
 			coordinates: [ longitude, latitude ]
 		},
-		deintersect: deintersect,
-		hexSize: hexSize,
-		noDeburr: noDeburr,
+		deintersect,
+		hexSize,
+		noDeburr,
 		provider: query.provider || DEFAULT_PROVIDER,
 		profile: query.profile || 'car',
-		resolution: resolution,
-		steps: distances
+		resolution,
+		distances
 	};
 
 	run(options)
