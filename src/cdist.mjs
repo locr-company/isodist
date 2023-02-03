@@ -16,20 +16,20 @@ function routeOSRM(option, options) {
 		}
 		const profile = options.profile;
 
-		if (!(option.coordinates instanceof Array )) {
+		if (!(option.coordinates instanceof Array)) {
 			return reject(new Error('Coordinates is not an array.'));
 		}
-		if (options.coordinates.length < 2) {
-			return reject(new Error(`Not enough coordinates where given (${options.coordinates.length}). Expected at least 2.`));
+		if (option.coordinates.length < 2) {
+			return reject(new Error(`Not enough coordinates where given (${options.coordinate.length}). Expected at least 2.`));
 		}
 		const coordinates = option.coordinates;
 		const first = coordinates[0];
 		const last = coordinates[coordinates.length - 1];
 
-		if (typeof first[0] !== 'number' || first[1] !== 'number') {
+		if (typeof first[0] !== 'number' || typeof first[1] !== 'number') {
 			return reject(new Error('First coordinate is not a number array.'));
 		}
-		if (typeof last[0] !== 'number' || last[1] !== 'number') {
+		if (typeof last[0] !== 'number' || typeof last[1] !== 'number') {
 			return reject(new Error('Last coordinate is not a number array.'));
 		}
 
