@@ -8,7 +8,7 @@ import _ from 'lodash';
 import log from './util/log.mjs';
 import http from 'http';
 
-function routeOSRM(option, options) {
+function routeOSRM(coordinates, options) {
 	return new Promise((resolve, reject) => {
 		const profiles = ['car', 'bicycle', 'foo'];
 		if (profiles.indexOf(options.profile) === -1) {
@@ -16,10 +16,9 @@ function routeOSRM(option, options) {
 		}
 		const profile = options.profile;
 
-		if (!(option.coordinates instanceof Array)) {
+		if (!(coordinates instanceof Array)) {
 			return reject(new Error('Coordinates is not an array.'));
 		}
-		const coordinates = option.coordinates;
 		if (coordinates.length < 2) {
 			return reject(new Error(`Not enough coordinates where given (${coordinates.length}). Expected at least 2.`));
 		}
@@ -34,13 +33,13 @@ function routeOSRM(option, options) {
 		}
 
 		const originLatitude = origin[0];
-		const originLongitude = origin[1];
+		const originLongitude = origin[1].toString();
 		const destinationLatitude = destination[0];
 		const destinationLongitude = destination[1];
 		if (originLatitude > 90 || originLatitude < -90) {
 			return reject(new Error(`Origin latitude (${originLatitude}) is out of range.`));
 		}
-		if (originLongitude > 540 || originLongitude < -540) {
+		if (!originLongitude.match(/^-?[0-9]{3}$/)) {
 			return reject(new Error(`Origin longitude (${originLongitude}) is out of range.`));
 		}
 		if (destinationLatitude > 90 || destinationLatitude < -90) {
@@ -85,10 +84,8 @@ function routeOSRM(option, options) {
 	});
 }
 
-function routeValhalla(option, options) {
+function routeValhalla(coordinates, _options) {
 	return new Promise((resolve, reject) => {
-		const coordinates = option.coordinates;
-
 		const postData = {
 			locations: [{
 				lat: coordinates[0][0],
@@ -177,19 +174,15 @@ export default async function cdist(origin, pgrid, options) {
 			[ feature.geometry.coordinates[1], feature.geometry.coordinates[0] ]
 		];
 
-		const option = {
-			coordinates,
-			json: true // Automatically parses the JSON string in the response
-		};
 		try {
 			let result;
 			switch(options.provider) {
 				case 'osrm':
-					result = await routeOSRM(option, options);
+					result = await routeOSRM(coordinates, options);
 					break;
 				
 				case 'valhalla':
-					result = await routeValhalla(option, options);
+					result = await routeValhalla(coordinates, options);
 					break;
 			}
 			feature.properties.distance = (result && result.routes.length > 0) ? result.routes[0].distance * 0.001 : Number.MAX_VALUE;
