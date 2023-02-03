@@ -33,6 +33,19 @@ function routeOSRM(option, options) {
 			return reject(new Error('Last coordinate is not a number array.'));
 		}
 
+		if (first[0] > 90 || first[0] < -90) {
+			return reject(new Error(`Origin latitude (${first[0]}) is out of range.`));
+		}
+		if (first[1] > 540 || first[1] < -540) {
+			return reject(new Error(`Origin longitude (${first[1]}) is out of range.`));
+		}
+		if (last[0] > 90 || last[0] < -90) {
+			return reject(new Error(`Destination latitude (${last[0]}) is out of range.`));
+		}
+		if (last[1] > 540 || last[1] < -540) {
+			return reject(new Error(`Destination longitude (${last[1]}) is out of range.`));
+		}
+
 		const restCallback = res => {
 			const { statusCode } = res;
 			const contentType = res.headers['content-type'];
