@@ -175,11 +175,11 @@ class IsoDistDemo {
 					applyChangesButton.disabled = false;
 				}
 
-				let oldPolygon = undefined;
+				let oldPolygon;
 				while(oldPolygon = this._polygons.pop()) {
 					oldPolygon.remove();
 				}
-				let oldCircle = undefined;
+				let oldCircle;
 				while(oldCircle = this._circles.pop()) {
 					oldCircle.remove();
 				}
@@ -291,11 +291,11 @@ class IsoDistDemo {
 				if (applyChangesButton instanceof HTMLButtonElement) {
 					applyChangesButton.disabled = false;
 				}
-				let oldPolygon = undefined;
+				let oldPolygon;
 				while(oldPolygon = this._polygons.pop()) {
 					oldPolygon.remove();
 				}
-				let oldCircle = undefined;
+				let oldCircle;
 				while(oldCircle = this._circles.pop()) {
 					oldCircle.remove();
 				}

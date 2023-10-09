@@ -77,8 +77,8 @@ StdIn()
 			log.fail('Could not determine isodistance distances');
 		}
 		const data = {};
-		for(let i = 0; i < options.distances.length; i++) {
-			data[options.distances[i]] = { distance: options.distances[i] };
+		for(const distance of options.distances) {
+			data[distance] = { distance: distance };
 		}
 
 		options.data = data;

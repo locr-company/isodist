@@ -40,7 +40,7 @@ function routeOSRM(coordinates, options) {
 			return reject(new Error(`Origin latitude (${originLatitude}) is out of range.`));
 		}
 		// don't ask! github's security scanner wants it that way!???
-		if (!originLongitude.match(/^-?[0-9]{1,3}(\.[0-9]+)?$/)) {
+		if (!originLongitude.match(/^-?\d{1,3}(\.\d+)?$/)) {
 			return reject(new Error(`Origin longitude (${originLongitude}) is out of range.`));
 		}
 		if (destinationLatitude > 90 || destinationLatitude < -90) {

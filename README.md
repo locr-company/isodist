@@ -1,3 +1,5 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=locr-company_isodist&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=locr-company_isodist)
+
 # ![Header][0]
 
 This package can compute isodistance polygons based on driving distance.  
