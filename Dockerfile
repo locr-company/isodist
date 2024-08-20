@@ -22,7 +22,7 @@ COPY ./package.json ./
 COPY ./package-lock.json ./
 COPY ./server ./server
 COPY ./src ./src
-RUN npm install
+RUN npm install --ignore-scripts
 
 FROM version-for-${environment} AS final
 
