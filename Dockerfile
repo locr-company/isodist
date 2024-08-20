@@ -8,7 +8,7 @@ RUN apt-get update && \
     apt-get clean
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs && \
+RUN apt-get --no-install-recommends install -y nodejs && \
     apt-get clean
 RUN npm install -g npm
 
