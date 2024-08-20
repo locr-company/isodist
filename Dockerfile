@@ -1,6 +1,7 @@
-ARG environment
-
 FROM node:20 AS base
+
+ARG environment
+ENV NODE_ENV ${environment}
 
 WORKDIR /app
 
@@ -14,5 +15,6 @@ COPY package-lock.json ./
 RUN npm install --ignore-scripts
 
 FROM version-for-${environment} AS final
+COPY start_env.sh ./
 
-CMD [ "npm", "start" ]
+CMD [ "./start_env.sh" ]
