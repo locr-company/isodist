@@ -1,3 +1,5 @@
+ARG environment
+
 FROM node:20 AS base
 
 ARG environment
