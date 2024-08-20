@@ -14,6 +14,12 @@ podman build \
     --build-arg environment=prod .
 
 CREATE_CMD="podman create"
+if [ ! -z "${VALHALLA_DATA_DATE}" ]; then
+    CREATE_CMD="${CREATE_CMD} -e VALHALLA_DATA_DATE=${VALHALLA_DATA_DATE}"
+fi
+if [ ! -z "${OSRM_DATA_DATE}" ]; then
+    CREATE_CMD="${CREATE_CMD} -e OSRM_DATA_DATE=${OSRM_DATA_DATE}"
+fi
 CREATE_CMD="${CREATE_CMD} --network=host"
 CREATE_CMD="${CREATE_CMD} --name=${ISODIST_NAME}"
 CREATE_CMD="${CREATE_CMD} ${ISODIST_NAME}"

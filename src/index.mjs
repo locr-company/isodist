@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * index.js
+ * index.mjs
  *
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT

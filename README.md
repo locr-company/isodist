@@ -28,6 +28,13 @@ Download and install [Valhalla](https://github.com/valhalla/valhalla) or [OSRM](
 
 #### 1.2.1. For production
 
+If you want to provide date information for the data used by osrm/valhalla via the API (`/api/status?provider=<provider>`):
+
+```bash
+export OSRM_DATA_DATE=2024-02-15
+export VALHALLA_DATA_DATE=2024-03-01
+```
+
 ```bash
 ./scripts/install_service.sh
 ```

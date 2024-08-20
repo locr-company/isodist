@@ -1,5 +1,5 @@
 /**
- * bbox.js
+ * bbox.mjs
  *
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT

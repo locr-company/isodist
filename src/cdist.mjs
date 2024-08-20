@@ -1,5 +1,5 @@
 /**
- * cdist.js
+ * cdist.mjs
  *
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
@@ -85,7 +85,7 @@ function routeOSRM(coordinates, options) {
 	});
 }
 
-function routeValhalla(coordinates, _options) {
+function routeValhalla(coordinates) {
 	return new Promise((resolve, reject) => {
 		const postData = {
 			locations: [{
