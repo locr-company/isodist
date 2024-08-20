@@ -183,7 +183,7 @@ export default async function cdist(origin, pgrid, options) {
 					break;
 				
 				case 'valhalla':
-					result = await routeValhalla(coordinates, options);
+					result = await routeValhalla(coordinates);
 					break;
 			}
 			feature.properties.distance = (result && result.routes.length > 0) ? result.routes[0].distance * 0.001 : Number.MAX_VALUE;
