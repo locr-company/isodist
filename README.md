@@ -1,3 +1,5 @@
+![GitHub](https://img.shields.io/github/license/locr-company/isodist)
+![github_tag](https://img.shields.io/github/v/tag/locr-company/isodist)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=locr-company_isodist&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=locr-company_isodist)
 
 # ![Header][0]
