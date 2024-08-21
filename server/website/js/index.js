@@ -1,4 +1,5 @@
 /* eslint-env browser */
+/* global L */
 
 class IsoDistDemo {
   constructor () {
@@ -313,7 +314,7 @@ class IsoDistDemo {
 let isodistDemo = null
 
 L.Control.IsoDist = L.Control.extend({
-  onAdd: function (_map) {
+  onAdd: function () {
     const buildNumberInputRow = function (col1Content, inputId, defaults) {
       const tRowDistance = document.createElement('tr')
       const tColDistance1 = document.createElement('td')
