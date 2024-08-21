@@ -102,8 +102,7 @@ async function IsoDist(origin, steps, options) {
 	if (options.deintersect && post.length > 1) {
 		for(let i = 0; i < post.length - 1; i++) {
 			for(let j = i; j < post.length - 1; j++) {
-				post[i] = turf.union(turf.featureCollection([post[i], post[j + 1]]));
-				post[i].properties = { ...post[i].properties };
+				post[i] = turf.union(turf.featureCollection([post[i], post[j + 1]]), { properties: post[i].properties });
 			}
 		}
 		for(let i = 0; i < post.length - 1; i++) {
