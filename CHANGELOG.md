@@ -17,5 +17,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - first official release
 
-[unreleased]: https://github.com/locr-company/isodist/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/locr-company/isodist/releases/tag/v1.1.0
+[unreleased]: https://github.com/locr-company/isodist/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/locr-company/isodist/releases/tag/1.1.0
