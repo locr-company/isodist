@@ -8,7 +8,7 @@
  */
 /* eslint no-loop-func: 1 */
 import _ from 'lodash';
-import * as Turf from '@turf/turf';
+import * as turf from '@turf/turf';
 import bbox from './bbox.mjs';
 import cdist from './cdist.mjs';
 import log from './util/log.mjs';
@@ -49,7 +49,7 @@ async function IsoDist(origin, steps, options) {
 	/**
 	 * Compute distances
 	 */
-	const pgrid = await cdist(origin, Turf.pointGrid(box, options.resolution), options);
+	const pgrid = await cdist(origin, turf.pointGrid(box, options.resolution), options);
 
 	while (!isolines) {
 		if (retries > MAX_RETRIES) {
@@ -102,16 +102,16 @@ async function IsoDist(origin, steps, options) {
 	if (options.deintersect && post.length > 1) {
 		for(let i = 0; i < post.length - 1; i++) {
 			for(let j = i; j < post.length - 1; j++) {
-				post[i] = Turf.union(post[i], post[j + 1]);
+				post[i] = turf.union(turf.featureCollection([post[i], post[j + 1]]));
 				post[i].properties = { ...post[i].properties };
 			}
 		}
 		for(let i = 0; i < post.length - 1; i++) {
-			post[i] = Turf.difference(post[i], post[i + 1]);
+			post[i] = turf.difference(turf.featureCollection([post[i], post[i + 1]]));
 		}
 	}
 
-	return Turf.featureCollection(post);
+	return turf.featureCollection(post);
 }
 
 export { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS };

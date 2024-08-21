@@ -39,7 +39,7 @@ export default function trace(pgrid, d, opts, origin) {
 	 */
 	const featureCollection = turf.featureCollection([hull]);
 	const box = turf.bbox(featureCollection);
-	const grid = turf.hexGrid(box, opts.hexSize, {units: 'kilometers', mask: hull});
+	const grid = turf.hexGrid(box, opts.hexSize, { units: 'kilometers', mask: hull });
 	const total = grid.features.length;
 
 	/**

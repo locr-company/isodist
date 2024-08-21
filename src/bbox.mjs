@@ -4,7 +4,7 @@
  * @author  Ringo Leese <r.leese@locr.com>
  * @license MIT
  */
-import * as Turf from '@turf/turf';
+import * as turf from '@turf/turf';
 import log from './util/log.mjs';
 
 /**
@@ -16,13 +16,13 @@ import log from './util/log.mjs';
 export default function bbox(center, radius) {
 	log('Computing bounding box...');
 
-	const turfCenter = Turf.point(center.coordinates);
-	const fc = Turf.featureCollection([
-		Turf.destination(turfCenter, radius, 0),
-		Turf.destination(turfCenter, radius, 90),
-		Turf.destination(turfCenter, radius, 180),
-		Turf.destination(turfCenter, radius, 270)
+	const turfCenter = turf.point(center.coordinates);
+	const fc = turf.featureCollection([
+		turf.destination(turfCenter, radius, 0),
+		turf.destination(turfCenter, radius, 90),
+		turf.destination(turfCenter, radius, 180),
+		turf.destination(turfCenter, radius, 270)
 	]);
 	log.success('Computing bounding box');
-	return Turf.bbox(fc);
+	return turf.bbox(fc);
 }
