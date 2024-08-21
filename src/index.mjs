@@ -7,110 +7,110 @@
  * @license MIT
  */
 /* eslint no-loop-func: 1 */
-import _ from 'lodash';
-import * as turf from '@turf/turf';
-import bbox from './bbox.mjs';
-import cdist from './cdist.mjs';
-import log from './util/log.mjs';
-import trace from './trace.mjs';
+import _ from 'lodash'
+import * as turf from '@turf/turf'
+import bbox from './bbox.mjs'
+import cdist from './cdist.mjs'
+import log from './util/log.mjs'
+import trace from './trace.mjs'
 
 /**
  * Kink coefficient
  * Resolution is multiplied when kinks are detected
  */
-const KINK_COEFF = 2.0;
+const KINK_COEFF = 2.0
 
 /**
  * Maximum number of retries before failing
  */
-const MAX_RETRIES = 10;
+const MAX_RETRIES = 10
 
-const VALID_PROVIDERS = ['osrm', 'valhalla'];
-const DEFAULT_PROVIDER = 'valhalla';
+const VALID_PROVIDERS = ['osrm', 'valhalla']
+const DEFAULT_PROVIDER = 'valhalla'
 
 /**
  * @param {GeoJSON} origin Example: { type: "Point", coordinates: [ 9.86557, 52.3703 ] }
- * @param {number[]} steps 
- * @param {Object} options 
+ * @param {number[]} steps
+ * @param {Object} options
  */
-async function IsoDist(origin, steps, options) {
-	/**
-	 * Determine the bounding box and generate point grid
-	 */
-	const maxStep = _.max(steps);
-	const box = bbox(origin, maxStep);
+async function IsoDist (origin, steps, options) {
+  /**
+   * Determine the bounding box and generate point grid
+   */
+  const maxStep = _.max(steps)
+  const box = bbox(origin, maxStep)
 
-	/**
-	 * Retry on kink
-	 */
-	let isolines = null;
-	let retries = 0;
+  /**
+   * Retry on kink
+   */
+  let isolines = null
+  let retries = 0
 
-	/**
-	 * Compute distances
-	 */
-	const pgrid = await cdist(origin, turf.pointGrid(box, options.resolution), options);
+  /**
+   * Compute distances
+   */
+  const pgrid = await cdist(origin, turf.pointGrid(box, options.resolution), options)
 
-	while (!isolines) {
-		if (retries > MAX_RETRIES) {
-			log.fail('Could not eliminate kinks in isoline polygons');
-		}
+  while (!isolines) {
+    if (retries > MAX_RETRIES) {
+      log.fail('Could not eliminate kinks in isoline polygons')
+    }
 
-		/**
-		 * Generate isolines and convert them to polygons
-		 */
-		try {
-			isolines = steps.map(i => trace(pgrid, i, options, origin));
-		} catch (x) {
-			if (!x.known) {
-				throw x;
-			}
-			options.resolution *= KINK_COEFF;
-			log.warn(`increased resolution to ${options.resolution} due to polygon kinks`);
-		}
+    /**
+     * Generate isolines and convert them to polygons
+     */
+    try {
+      isolines = steps.map(i => trace(pgrid, i, options, origin))
+    } catch (x) {
+      if (!x.known) {
+        throw x
+      }
+      options.resolution *= KINK_COEFF
+      log.warn(`increased resolution to ${options.resolution} due to polygon kinks`)
+    }
 
-		retries++;
-	}
+    retries++
+  }
 
-	/**
-	 * Post-processing
-	 *  - Sort by reverse distance
-	 *  - Attach additional data to the feature properties
-	 */
-	log('Post-processing...');
-	const post = _
-		.chain(isolines)
-		.sortBy(i => -i.properties.distance)
-		.forEach(i => {
-			const data = options.data[i.properties.distance];
-			if (!data) {
-				log.warn(`No data found for d=${i.properties.distance}`);
-			}
-			_.assign(i.properties, data);
-		})
-		.value();
+  /**
+   * Post-processing
+   *  - Sort by reverse distance
+   *  - Attach additional data to the feature properties
+   */
+  log('Post-processing...')
+  const post = _
+    .chain(isolines)
+    .sortBy(i => -i.properties.distance)
+    .forEach(i => {
+      const data = options.data[i.properties.distance]
+      if (!data) {
+        log.warn(`No data found for d=${i.properties.distance}`)
+      }
+      _.assign(i.properties, data)
+    })
+    .value()
 
-	/**
-	 * Sanity-check the result
-	 */
-	if (post.length !== steps.length) {
-		log.fail(`Expected ${steps.length} polygons but produced ${post.length}`);
-	}
+  /**
+   * Sanity-check the result
+   */
+  if (post.length !== steps.length) {
+    log.fail(`Expected ${steps.length} polygons but produced ${post.length}`)
+  }
 
-	log.success('Complete');
+  log.success('Complete')
 
-	if (options.deintersect && post.length > 1) {
-		for(let i = 0; i < post.length - 1; i++) {
-			for(let j = i; j < post.length - 1; j++) {
-				post[i] = turf.union(turf.featureCollection([post[i], post[j + 1]]), { properties: post[i].properties });
-			}
-		}
-		for(let i = 0; i < post.length - 1; i++) {
-			post[i] = turf.difference(turf.featureCollection([post[i], post[i + 1]]));
-		}
-	}
+  if (options.deintersect && post.length > 1) {
+    for (let i = 0; i < post.length - 1; i++) {
+      for (let j = i; j < post.length - 1; j++) {
+        post[i] = turf.union(turf.featureCollection([post[i], post[j + 1]]), { properties: post[i].properties })
+      }
+    }
+    for (let i = 0; i < post.length - 1; i++) {
+      post[i] = turf.difference(turf.featureCollection([post[i], post[i + 1]]))
+    }
+  }
 
-	return turf.featureCollection(post);
+  return turf.featureCollection(post)
 }
 
-export { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS };
+export { IsoDist, DEFAULT_PROVIDER, VALID_PROVIDERS }
