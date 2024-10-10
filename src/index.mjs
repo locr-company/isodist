@@ -93,6 +93,11 @@ async function IsoDist (origin, steps, options) {
   /**
    * Sanity-check the result
    */
+  for (let i = post.length - 1; i >= 0; i--) {
+    if (!post[i].type) {
+      post.splice(i, 1)
+    }
+  }
   if (post.length !== steps.length) {
     log.fail(`Expected ${steps.length} polygons but produced ${post.length}`)
   }
