@@ -21,6 +21,7 @@ let runningTasks = 0
 let totalTasks = 0
 
 const app = Express()
+app.disable('x-powered-by')
 app.use(Cors())
 app.use(BodyParser.json())
 app.use(Express.static('website'))
@@ -105,6 +106,9 @@ app.get('/api/', (req, res) => {
   const distances = []
   if (!query.distances) {
     return sendBadRequest('Missing required parameter "distances".', res)
+  }
+  if (typeof query.distances !== 'string') {
+    return sendBadRequest('Invalid "distances" value. It must be a string.', res)
   }
   const distancesSplitted = query.distances.split(',')
   let distanceCounter = 0
