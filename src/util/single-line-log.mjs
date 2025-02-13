@@ -4,6 +4,7 @@
 
 import stringWidth from 'string-width'
 
+const MAX_PREV_LINES = 1000
 const MOVE_LEFT = Buffer.from('1b5b3130303044', 'hex').toString()
 const MOVE_UP = Buffer.from('1b5b3141', 'hex').toString()
 const CLEAR_LINE = Buffer.from('1b5b304b', 'hex').toString()
@@ -42,7 +43,10 @@ export default function (stream) {
     stream.write(str)
 
     // How many lines to remove on next clear screen
-    const prevLines = nextStr.split('\n')
+    let prevLines = nextStr.split('\n')
+    if (prevLines.length > MAX_PREV_LINES) {
+      prevLines = prevLines.slice(0, MAX_PREV_LINES)
+    }
     prevLineCount = 0
     for (let i = 0; i < prevLines.length; i++) {
       prevLineCount += Math.ceil(stringWidth(prevLines[i]) / stream.columns) || 1
