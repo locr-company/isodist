@@ -4,7 +4,7 @@
  * @author  Denis Luchkin-Zhou <denis@ricepo.com>
  * @license 2015-16 (C) Ricepo LLC. All Rights Reserved.
  */
-import Log from 'single-line-log'
+import Log from './single-line-log.mjs'
 import chalk from 'chalk'
 
 const write = Log(process.stderr)
