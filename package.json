@@ -52,7 +52,7 @@
     "@types/body-parser": "^1.19",
     "@types/cors": "^2.8",
     "@types/express": "^5.0",
-    "@types/leaflet": "^1.7",
+    "@types/leaflet": "^1.9",
     "eslint": "^9.23",
     "globals": "^16.0",
     "standard": "^17.1"
